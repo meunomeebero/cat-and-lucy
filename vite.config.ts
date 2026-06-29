@@ -21,7 +21,7 @@ function apiDevServer(): Plugin {
       server.middlewares.use("/api/gifts", async (req, res) => {
         res.setHeader("content-type", "application/json");
         try {
-          const { listGifts, createGift } = await server.ssrLoadModule("/api/_server/gifts.ts");
+          const { listGifts, createGift } = await server.ssrLoadModule("/api/gifts.ts");
           if (req.method === "GET") {
             res.end(JSON.stringify(await listGifts()));
             return;
