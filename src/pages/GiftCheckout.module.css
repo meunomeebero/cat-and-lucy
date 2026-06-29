@@ -1,0 +1,230 @@
+.page {
+  position: relative;
+  min-height: 100vh;
+  padding: 2rem 1.25rem 4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: var(--papel);
+  overflow: hidden;
+}
+
+.voltar {
+  align-self: flex-start;
+  font-family: var(--font-corpo);
+  font-weight: 600;
+  color: var(--tinta);
+  background-color: var(--bege);
+  border-radius: 999px;
+  padding: 0.5rem 1.1rem;
+  text-decoration: none;
+  margin-bottom: 1.5rem;
+}
+
+.wrap {
+  width: 100%;
+  max-width: 540px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+  z-index: 2;
+}
+
+/* presente escolhido */
+.gift {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  background-color: var(--rosa);
+  border-radius: 30px;
+  padding: 1.2rem 1.4rem;
+}
+.giftImg {
+  width: 92px;
+  height: 92px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.giftInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.giftLabel {
+  font-family: var(--font-corpo);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tinta);
+}
+.giftNome {
+  font-family: var(--font-corpo);
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: var(--tinta);
+}
+.giftPreco {
+  font-family: var(--font-script);
+  font-weight: 700;
+  font-size: 1.8rem;
+  color: var(--rosa-forte);
+  line-height: 1;
+}
+
+/* formulário */
+.form {
+  background-color: var(--creme);
+  border-radius: 30px;
+  padding: 1.6rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.campoLabel {
+  font-family: var(--font-corpo);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--tinta);
+}
+.input,
+.textarea {
+  font-family: var(--font-corpo);
+  font-size: 1rem;
+  color: var(--tinta);
+  background-color: var(--bege);
+  border: none;
+  border-radius: 18px;
+  padding: 0.8rem 1rem;
+  outline: none;
+  width: 100%;
+}
+.textarea {
+  resize: vertical;
+  min-height: 88px;
+}
+.inputErro {
+  background-color: #f6d6d6;
+}
+.aviso {
+  font-family: var(--font-corpo);
+  font-size: 0.85rem;
+  color: var(--rosa-forte);
+}
+
+/* foto */
+.fotoRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.avatarPreview {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: var(--lilas);
+  flex-shrink: 0;
+}
+.avatarVazio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-script);
+  font-size: 1.6rem;
+  color: var(--tinta);
+}
+.fotoBtn {
+  font-family: var(--font-corpo);
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--tinta);
+  background-color: var(--lilas);
+  border-radius: 999px;
+  padding: 0.55rem 1.1rem;
+  cursor: pointer;
+}
+.fileHidden {
+  display: none;
+}
+
+/* concluir */
+.concluir {
+  font-family: var(--font-script);
+  font-weight: 700;
+  font-size: 1.9rem;
+  color: var(--creme);
+  background-color: var(--rosa-forte);
+  border-radius: 999px;
+  padding: 0.7rem 1.4rem;
+  width: 100%;
+}
+
+/* agradecimento */
+.obrigado {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 1rem;
+  padding: 2rem 1.5rem;
+}
+.obrigadoTitulo {
+  font-family: var(--font-script);
+  font-weight: 700;
+  font-size: clamp(2.6rem, 10vw, 4.2rem);
+  color: var(--tinta-rosa);
+  line-height: 0.95;
+}
+.obrigadoTexto {
+  font-family: var(--font-corpo);
+  font-size: 1.1rem;
+  color: var(--tinta);
+  max-width: 420px;
+}
+.obrigadoBotoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  justify-content: center;
+  margin-top: 0.8rem;
+}
+.botaoMesa {
+  font-family: var(--font-corpo);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--creme);
+  background-color: var(--rosa-forte);
+  border-radius: 999px;
+  padding: 0.7rem 1.4rem;
+  text-decoration: none;
+}
+.botaoTopo {
+  font-family: var(--font-corpo);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--tinta);
+  background-color: var(--amarelo);
+  border-radius: 999px;
+  padding: 0.7rem 1.4rem;
+  text-decoration: none;
+}
+
+.naoAchou {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 1rem;
+}
+
+.deco1 { position: absolute; top: 8%; right: 8%; z-index: 1; }
+.deco2 { position: absolute; bottom: 6%; left: 6%; z-index: 1; }

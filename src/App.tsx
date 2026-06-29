@@ -1,7 +1,12 @@
+import { Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
+import GiftCheckout from "./pages/GiftCheckout";
+
 export default function App() {
   return (
-    <h1 style={{ fontFamily: "var(--font-script)", color: "var(--tinta-rosa)" }}>
-      Catarina &amp; Lúcia
-    </h1>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/presente/:id" element={<GiftCheckout />} />
+    </Routes>
   );
 }

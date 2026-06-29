@@ -1,0 +1,74 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background-color: rgba(107, 88, 71, 0.38);
+}
+
+.card {
+  position: relative;
+  background-color: var(--creme);
+  border-radius: 32px;
+  padding: 2.4rem 1.8rem 2rem;
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+}
+
+.fechar {
+  position: absolute;
+  top: 0.7rem;
+  right: 1rem;
+  font-size: 1.8rem;
+  line-height: 1;
+  color: var(--tinta);
+  background-color: var(--bege);
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatarWrap {
+  margin-top: -0.4rem;
+}
+
+.titulo {
+  font-family: var(--font-script);
+  font-weight: 700;
+  font-size: 2rem;
+  color: var(--tinta-rosa);
+  line-height: 1;
+}
+
+.giftImg {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  margin-top: 0.3rem;
+}
+
+.giftNome {
+  font-family: var(--font-corpo);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--tinta);
+}
+
+.mensagem {
+  font-family: var(--font-corpo);
+  font-size: 1.05rem;
+  color: var(--tinta);
+  margin-top: 0.4rem;
+  line-height: 1.5;
+}

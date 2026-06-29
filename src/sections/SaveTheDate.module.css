@@ -1,0 +1,117 @@
+.section {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--creme);
+}
+
+/* blobs amarelos flat (cor sólida, SEM degradê) */
+.blob {
+  position: absolute;
+  background-color: var(--amarelo);
+  z-index: 0;
+}
+.blobTopLeft {
+  width: 360px;
+  height: 360px;
+  top: -150px;
+  left: -130px;
+  border-radius: 47% 53% 62% 38% / 45% 52% 48% 55%;
+  transform: rotate(-8deg);
+}
+.blobBottomRight {
+  width: 380px;
+  height: 380px;
+  bottom: -170px;
+  right: -150px;
+  border-radius: 55% 45% 40% 60% / 50% 48% 52% 50%;
+  transform: rotate(10deg);
+}
+
+.center {
+  position: relative;
+  z-index: 6;
+  text-align: center;
+  padding: 1rem 1.5rem;
+  max-width: 720px;
+}
+
+.ribbon {
+  margin: 0 auto 0.75rem;
+}
+
+.nomes {
+  font-family: var(--font-script);
+  font-size: clamp(3.2rem, 13vw, 7.5rem);
+  color: var(--tinta-rosa);
+  line-height: 0.85;
+  font-weight: 700;
+}
+.e {
+  color: var(--lilas-forte);
+  font-size: 0.85em;
+  padding: 0 0.1em;
+}
+
+.sub {
+  font-family: var(--font-corpo);
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-size: clamp(0.78rem, 2.4vw, 1.05rem);
+  color: var(--tinta);
+  margin-top: 0.85rem;
+}
+
+.evento {
+  font-family: var(--font-script);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 4.5vw, 2.3rem);
+  color: var(--rosa-forte);
+  margin-top: 1.1rem;
+}
+
+.local {
+  font-family: var(--font-corpo);
+  font-size: clamp(0.8rem, 2vw, 0.95rem);
+  color: var(--tinta);
+  margin-top: 0.3rem;
+  line-height: 1.45;
+}
+
+/* decorações absolutas */
+.deco {
+  position: absolute;
+  z-index: 2;
+}
+.cloud1 { top: 9%; left: 5%; }
+.cloud2 { top: 16%; right: 7%; }
+.cloud3 { bottom: 20%; left: 9%; }
+.rainbow1 { top: 30%; left: 2%; z-index: 1; }
+.rainbow2 { bottom: 12%; right: 3%; z-index: 1; }
+.crown1 { top: 8%; left: 50%; transform: translateX(-50%); z-index: 5; }
+.crown2 { top: 24%; right: 16%; }
+.star1 { top: 22%; left: 24%; }
+.star2 { top: 40%; right: 22%; }
+.star3 { bottom: 30%; left: 30%; }
+.star4 { top: 50%; left: 12%; }
+
+.balloons {
+  position: absolute;
+  bottom: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.4rem;
+  align-items: flex-end;
+  z-index: 3;
+}
+
+@media (max-width: 560px) {
+  .crown2, .star2, .star4 { display: none; }
+  .cloud2 { right: 2%; top: 11%; }
+}

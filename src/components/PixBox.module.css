@@ -1,0 +1,92 @@
+.box {
+  background-color: var(--menta);
+  border-radius: 30px;
+  padding: 1.8rem 1.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+}
+
+.titulo {
+  font-family: var(--font-script);
+  font-weight: 700;
+  font-size: 2rem;
+  color: var(--tinta);
+}
+
+.qrWrap {
+  background-color: var(--creme);
+  border-radius: 22px;
+  padding: 0.9rem;
+  margin: 0.3rem 0;
+  line-height: 0;
+}
+
+.valor {
+  font-family: var(--font-script);
+  font-weight: 700;
+  font-size: 2.2rem;
+  color: var(--rosa-forte);
+  line-height: 1;
+}
+
+.linha {
+  width: 100%;
+  margin-top: 0.4rem;
+}
+.label {
+  font-family: var(--font-corpo);
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tinta);
+}
+.valorLinha {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 0.2rem;
+}
+.chave {
+  font-family: var(--font-corpo);
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--tinta);
+  letter-spacing: 0.02em;
+}
+.copiar {
+  font-family: var(--font-corpo);
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--rosa-forte);
+  background-color: var(--creme);
+  border-radius: 999px;
+  padding: 0.25rem 0.7rem;
+}
+
+.copiaCola {
+  font-family: var(--font-corpo);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--tinta);
+  background-color: var(--amarelo);
+  border-radius: 999px;
+  padding: 0.7rem 1.2rem;
+  margin-top: 0.8rem;
+}
+
+.favorecido {
+  font-family: var(--font-corpo);
+  font-size: 0.92rem;
+  color: var(--tinta);
+  margin-top: 0.7rem;
+}
+.dica {
+  font-family: var(--font-corpo);
+  font-size: 0.8rem;
+  color: var(--tinta);
+  opacity: 0.75;
+}

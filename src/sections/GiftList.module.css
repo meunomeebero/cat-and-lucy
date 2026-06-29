@@ -1,0 +1,77 @@
+.section {
+  position: relative;
+  min-height: 100vh;
+  padding: 4.5rem 1.5rem 5.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: var(--papel);
+}
+
+.head {
+  text-align: center;
+  margin-bottom: 2.75rem;
+  z-index: 2;
+}
+.titulo {
+  font-family: var(--font-script);
+  font-weight: 700;
+  font-size: clamp(2.6rem, 9vw, 4.2rem);
+  color: var(--tinta-rosa);
+  line-height: 0.9;
+}
+.sub {
+  font-family: var(--font-corpo);
+  font-size: clamp(0.95rem, 2.6vw, 1.2rem);
+  color: var(--tinta);
+  margin-top: 0.6rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 215px));
+  gap: 1.6rem;
+  justify-content: center;
+  width: 100%;
+  max-width: 900px;
+  z-index: 2;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1.6rem 1rem 1.4rem;
+  border-radius: 30px;
+  cursor: pointer;
+  text-align: center;
+}
+.card:nth-child(4n + 1) { background-color: var(--rosa); }
+.card:nth-child(4n + 2) { background-color: var(--amarelo); }
+.card:nth-child(4n + 3) { background-color: var(--lilas); }
+.card:nth-child(4n) { background-color: var(--menta); }
+
+.cardImg {
+  width: 116px;
+  height: 116px;
+  object-fit: contain;
+}
+.cardNome {
+  font-family: var(--font-corpo);
+  font-weight: 600;
+  font-size: 1.02rem;
+  color: var(--tinta);
+}
+.cardPreco {
+  font-family: var(--font-script);
+  font-weight: 700;
+  font-size: 1.65rem;
+  color: var(--rosa-forte);
+  line-height: 1;
+}
+
+.decoA { position: absolute; top: 13%; right: 11%; z-index: 1; }
+.decoB { position: absolute; bottom: 7%; left: 5%; z-index: 1; }
