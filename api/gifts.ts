@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { listGifts, createGift } from "../src/server/gifts";
+import { listGifts, createGift } from "./_server/gifts";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
