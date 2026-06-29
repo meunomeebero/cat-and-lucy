@@ -51,6 +51,25 @@
   text-align: center;
 }
 
+/* folha de papel creme colada atrás (offset + borda rasgada), SEM sombra — profundidade tátil */
+.card::before {
+  content: "";
+  position: absolute;
+  top: 7px;
+  left: 8px;
+  right: -9px;
+  bottom: -8px;
+  background-color: #f7eedd;
+  z-index: -1;
+  transform: rotate(2.5deg);
+  /* borda levemente irregular = papel recortado à mão (não é retângulo perfeito) */
+  clip-path: polygon(
+    2% 6%, 16% 2%, 33% 7%, 50% 1%, 67% 6%, 84% 2%, 98% 8%,
+    96% 26%, 99% 50%, 96% 73%, 99% 95%, 82% 98%, 60% 95%,
+    40% 99%, 18% 96%, 3% 98%, 1% 74%, 4% 50%, 1% 27%
+  );
+}
+
 /* washi tape (fita) — cor sólida com leve transparência, SEM sombra */
 .washi {
   position: absolute;
@@ -87,7 +106,14 @@
   font-size: 1.65rem;
   color: var(--rosa-forte);
   line-height: 1;
+  transform: rotate(-2.5deg);
 }
 
 .decoA { position: absolute; top: 13%; right: 11%; z-index: 1; }
 .decoB { position: absolute; bottom: 7%; left: 5%; z-index: 1; }
+.decoC { position: absolute; top: 40%; left: 8%; z-index: 1; }
+.decoD { position: absolute; bottom: 22%; right: 9%; z-index: 1; }
+
+/* confete/brilho POR CIMA dos cards (profundidade de campo), sem bloquear clique */
+.over1 { position: absolute; top: 46%; left: 30%; z-index: 5; pointer-events: none; }
+.over2 { position: absolute; top: 38%; right: 28%; z-index: 5; pointer-events: none; }
