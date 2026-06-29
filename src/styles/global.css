@@ -4,9 +4,7 @@
   padding: 0;
 }
 
-html {
-  scroll-behavior: smooth;
-}
+/* scroll suave (inércia/easing) é controlado pelo Lenis em JS; o CSS smooth é desligado por ele */
 
 body {
   font-family: var(--font-corpo);

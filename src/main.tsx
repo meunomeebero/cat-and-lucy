@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
+import "lenis/dist/lenis.css";
 import "@fontsource/caveat/400.css";
 import "@fontsource/caveat/700.css";
 import "@fontsource/fredoka/400.css";
