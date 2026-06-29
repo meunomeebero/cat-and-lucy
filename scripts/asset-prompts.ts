@@ -1,11 +1,15 @@
 // Estilo comum a todos os assets: adesivo recortado / scrapbook, pastel, fofo,
-// SEM sombra, SEM neon, SEM degradê chapado, fundo TRANSPARENTE (PNG alpha).
+// SEM sombra, SEM neon, SEM degradê.
+// O Gemini não entrega alpha de verdade, então geramos sobre um FUNDO VERDE CHROMA-KEY
+// sólido e removemos esse verde depois com o sharp (chroma key) para virar transparente.
 const BASE =
   "children's storybook sticker, hand-drawn crayon and gouache texture, soft pastel colors " +
   "(cotton-candy pink, butter yellow, soft lilac, mint green, cream beige), flat cute kawaii " +
-  "illustration, die-cut sticker with a subtle white paper edge, NO drop shadow, NO neon, " +
-  "NO gradient mesh, NO realistic lighting. Isolated on a FULLY TRANSPARENT background (PNG alpha). " +
-  "Single centered object, crisp clean edges, high detail.";
+  "illustration, die-cut sticker with a thin white paper edge, NO drop shadow, NO neon, NO gradient, " +
+  "NO realistic lighting. A single centered object. " +
+  "Place it on a SOLID FLAT UNIFORM CHROMA-KEY GREEN background (pure green RGB 0,255,0) that fills " +
+  "the WHOLE image: the background must be ONE single flat green color, no gradient, no pattern, " +
+  "no checkerboard, no shadow, no second object. Crisp clean edges.";
 
 export type AssetPrompt = { file: string; prompt: string };
 
