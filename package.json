@@ -1,0 +1,36 @@
+{
+  "name": "festa-catarina-lucia",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "assets": "node --env-file=.env --experimental-strip-types scripts/generate-assets.ts",
+    "review": "node --env-file=.env --experimental-strip-types scripts/design-review.ts"
+  },
+  "dependencies": {
+    "motion": "^12.42.0",
+    "qrcode.react": "^4.2.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^7.18.0"
+  },
+  "devDependencies": {
+    "@fontsource/caveat": "^5.2.8",
+    "@fontsource/fredoka": "^5.2.10",
+    "@fontsource/grandstander": "^5.2.7",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "jsdom": "^29.1.1",
+    "sharp": "^0.35.2",
+    "typescript": "^6.0.3",
+    "vite": "^8.1.0",
+    "vitest": "^4.1.9"
+  }
+}

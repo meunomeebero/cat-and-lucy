@@ -1,0 +1,18 @@
+:root {
+  /* Paleta pastel (scrapbook). Sem neon. */
+  --rosa: #f7c9d6;
+  --rosa-forte: #e89ab0;
+  --amarelo: #fce8a6;
+  --amarelo-forte: #f6d365;
+  --bege: #f3e7d3;
+  --creme: #fbf6ec;
+  --lilas: #d8c8ef;
+  --lilas-forte: #b9a3e0;
+  --menta: #cfe9d4;
+  --papel: #fbf6ec;
+  --tinta: #6b5847;
+  --tinta-rosa: #c96a86;
+
+  --font-script: "Caveat", cursive;
+  --font-corpo: "Fredoka", system-ui, sans-serif;
+}

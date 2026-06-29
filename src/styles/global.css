@@ -1,0 +1,41 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-corpo);
+  color: var(--tinta);
+  background-color: var(--papel);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/*
+  REGRA DE OURO deste projeto (estilo infantil/scrapbook):
+  PROIBIDO box-shadow, qualquer *-gradient (degradê), cores neon e bordas destacadas.
+  Profundidade só por sobreposição de recortes + leve rotação (adesivo colado torto).
+*/
+
+img {
+  display: block;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+a {
+  color: inherit;
+}
