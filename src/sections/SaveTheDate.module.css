@@ -68,17 +68,19 @@
 .evento {
   font-family: var(--font-script);
   font-weight: 700;
-  font-size: clamp(1.5rem, 4.5vw, 2.3rem);
+  font-size: clamp(1.6rem, 4.8vw, 2.5rem);
+  letter-spacing: 0.02em;
   color: var(--rosa-forte);
-  margin-top: 1.1rem;
+  margin-top: 1.2rem;
 }
 
 .local {
   font-family: var(--font-corpo);
-  font-size: clamp(0.8rem, 2vw, 0.95rem);
-  color: var(--tinta);
-  margin-top: 0.3rem;
-  line-height: 1.45;
+  font-weight: 500;
+  font-size: clamp(0.85rem, 2vw, 1rem);
+  color: #5a4636;
+  margin-top: 0.4rem;
+  line-height: 1.5;
 }
 
 /* decorações absolutas */
@@ -100,8 +102,8 @@
 
 .balloons {
   position: absolute;
-  bottom: 5%;
-  left: 50%;
+  bottom: 4%;
+  left: 26%;
   transform: translateX(-50%);
   display: flex;
   gap: 0.4rem;

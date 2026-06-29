@@ -9,6 +9,8 @@ import styles from "./GiftTable.module.css";
 
 const FALLBACK = "/assets/presente-1.png";
 const ROTACOES = [-5, 4, -3, 6, -6, 3, 5, -4, 2, -2];
+const STAGGER = [0, 30, 10, 36, 4, 22, 14, 2, 26, 8]; // desalinha verticalmente
+const ESCALAS = [1, 0.92, 1.07, 0.96, 1.04, 0.9, 1.02, 0.94, 1.06, 0.98];
 
 export function GiftTable() {
   const [gifts, setGifts] = useState<SentGift[]>([]);
@@ -35,20 +37,22 @@ export function GiftTable() {
       <div className={styles.mesa}>
         {gifts.map((g, i) => {
           const rot = ROTACOES[i % ROTACOES.length];
+          const sc = ESCALAS[i % ESCALAS.length];
           const asset = getGiftById(g.giftId)?.asset ?? FALLBACK;
           return (
             <motion.button
               key={g.id}
               className={styles.item}
-              initial={{ rotate: rot }}
-              animate={{ y: [0, -12, 0], rotate: rot }}
+              style={{ marginTop: STAGGER[i % STAGGER.length] }}
+              initial={{ rotate: rot, scale: sc }}
+              animate={{ y: [0, -12, 0], rotate: rot, scale: sc }}
               transition={{
                 duration: 4 + (i % 4) * 0.5,
                 delay: (i % 5) * 0.25,
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
-              whileHover={{ scale: 1.07 }}
+              whileHover={{ scale: sc + 0.08 }}
               onClick={() => setSel(g)}
             >
               <span className={styles.avatarOver}>
