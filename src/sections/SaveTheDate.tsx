@@ -73,7 +73,7 @@ export function SaveTheDate() {
       <motion.div className={styles.center} style={{ y: textY, opacity: textOpacity }}>
         <Sticker src="/assets/fita-save-the-date.png" width={210} className={styles.ribbon} alt="Save the date" />
         <h1 className={styles.nomes}>
-          Catarina <span className={styles.e}>&amp;</span> Lúcia
+          Catarina <span className={styles.e}>&amp;</span> Lucia
         </h1>
         <p className={styles.sub}>Festa de aniversário</p>
         <p className={styles.evento}>24 de junho · 13h</p>

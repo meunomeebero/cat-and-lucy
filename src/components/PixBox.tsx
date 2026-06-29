@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
+import { playPop } from "../lib/sounds";
 import styles from "./PixBox.module.css";
 
 const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -16,6 +17,7 @@ export function PixBox({ payload, chave, valor, favorecido }: PixBoxProps) {
 
   const copiar = async (texto: string, qual: "chave" | "codigo") => {
     try {
+      playPop();
       await navigator.clipboard.writeText(texto);
       setCopiado(qual);
       setTimeout(() => setCopiado(""), 1800);

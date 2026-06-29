@@ -1,7 +1,7 @@
-# Festa de Aniversário — Catarina & Lúcia 🎂
+# Festa de Aniversário — Catarina & Lucia 🎂
 
 Site estático e fofo (estilo scrapbook / adesivo, tons pastéis) para o aniversário da
-Maria Catarina e da Maria Lúcia. Tem "Save the Date" com flutuação e parallax, uma lista
+Maria Catarina e da Maria Lucia. Tem "Save the Date" com flutuação e parallax, uma lista
 de presentes, um checkout com Pix e uma mesa de presentes coletiva.
 
 > **Tudo é mockado e 100% client-side.** Não há backend, banco de dados, login nem

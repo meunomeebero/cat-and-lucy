@@ -6,6 +6,7 @@ import { buildPixPayload } from "../lib/pix";
 import { addSentGift } from "../lib/giftTable";
 import { PixBox } from "../components/PixBox";
 import { FloatingAsset } from "../components/FloatingAsset";
+import { playPop, playTwinkle } from "../lib/sounds";
 import styles from "./GiftCheckout.module.css";
 
 const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -18,6 +19,8 @@ export default function GiftCheckout() {
   const [mensagem, setMensagem] = useState("");
   const [erro, setErro] = useState(false);
   const [enviado, setEnviado] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+  const [erroEnvio, setErroEnvio] = useState(false);
 
   if (!gift) {
     return (
@@ -39,18 +42,28 @@ export default function GiftCheckout() {
     txid: gift.id,
   });
 
-  const onConcluir = () => {
+  const onConcluir = async () => {
     if (!nome.trim()) {
       setErro(true);
       return;
     }
-    addSentGift({
-      nomeRemetente: nome.trim(),
-      mensagem: mensagem.trim(),
-      giftId: gift.id,
-      giftNome: gift.nome,
-    });
-    setEnviado(true);
+    playPop();
+    setEnviando(true);
+    setErroEnvio(false);
+    try {
+      await addSentGift({
+        nomeRemetente: nome.trim(),
+        mensagem: mensagem.trim(),
+        giftId: gift.id,
+        giftNome: gift.nome,
+      });
+      playTwinkle();
+      setEnviado(true);
+    } catch {
+      setErroEnvio(true);
+    } finally {
+      setEnviando(false);
+    }
   };
 
   if (enviado) {
@@ -64,7 +77,7 @@ export default function GiftCheckout() {
         <FloatingAsset src="/assets/coroa-1.png" width={110} duration={4} />
         <h1 className={styles.obrigadoTitulo}>Presente enviado!</h1>
         <p className={styles.obrigadoTexto}>
-          Muito obrigado, {nome.trim()}! Seu presentinho já foi pra mesa da Catarina e da Lúcia. 💛
+          Muito obrigado, {nome.trim()}! Seu presentinho já foi pra mesa da Catarina e da Lucia. 💛
         </p>
         <div className={styles.obrigadoBotoes}>
           <a href="/#mesa" className={styles.botaoMesa}>
@@ -131,9 +144,17 @@ export default function GiftCheckout() {
 
         <PixBox payload={payload} chave="036.417.452-84" valor={gift.preco} favorecido="Roberto Rocha da Costa Junior" />
 
-        <motion.button className={styles.concluir} whileTap={{ scale: 0.97 }} onClick={onConcluir}>
-          Concluir
+        <motion.button
+          className={styles.concluir}
+          whileTap={{ scale: 0.97 }}
+          onClick={onConcluir}
+          disabled={enviando}
+        >
+          {enviando ? "Enviando..." : "Concluir"}
         </motion.button>
+        {erroEnvio && (
+          <span className={styles.aviso}>Ops, não consegui enviar agora. Tenta de novo? 💛</span>
+        )}
       </div>
     </main>
   );

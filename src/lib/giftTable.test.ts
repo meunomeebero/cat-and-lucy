@@ -1,35 +1,37 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { getSentGifts, addSentGift, SEED_GIFTS } from "./giftTable";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { getSentGifts, addSentGift } from "./giftTable";
 
-beforeEach(() => localStorage.clear());
+afterEach(() => vi.restoreAllMocks());
 
-describe("giftTable", () => {
-  it("sem nada salvo, retorna so as seeds", () => {
-    expect(getSentGifts().length).toBe(SEED_GIFTS.length);
+describe("giftTable client (API)", () => {
+  it("getSentGifts faz GET /api/gifts e retorna a lista", async () => {
+    const data = [
+      { id: "1", nomeRemetente: "A", mensagem: "", giftId: "x", giftNome: "X", criadoEm: 1 },
+    ];
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => data });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const res = await getSentGifts();
+    expect(fetchMock).toHaveBeenCalledWith("/api/gifts");
+    expect(res).toEqual(data);
   });
 
-  it("addSentGift adiciona e aparece no topo", () => {
-    const novo = addSentGift({
-      nomeRemetente: "Família Souza",
-      mensagem: "Parabéns!",
-      giftId: "ursinho",
-      giftNome: "Ursinho de pelúcia",
-    });
-    const lista = getSentGifts();
-    expect(lista.length).toBe(SEED_GIFTS.length + 1);
-    expect(lista[0].id).toBe(novo.id);
-    expect(lista[0].nomeRemetente).toBe("Família Souza");
+  it("addSentGift faz POST /api/gifts com o corpo certo", async () => {
+    const created = {
+      id: "2", nomeRemetente: "B", mensagem: "oi", giftId: "ursinho", giftNome: "Ursinho", criadoEm: 2,
+    };
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => created });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const res = await addSentGift({ nomeRemetente: "B", mensagem: "oi", giftId: "ursinho", giftNome: "Ursinho" });
+    expect(fetchMock).toHaveBeenCalledWith("/api/gifts", expect.objectContaining({ method: "POST" }));
+    const body = JSON.parse((fetchMock.mock.calls[0][1] as RequestInit).body as string);
+    expect(body.nomeRemetente).toBe("B");
+    expect(res).toEqual(created);
   });
 
-  it("persiste entre chamadas (mesmo localStorage)", () => {
-    addSentGift({ nomeRemetente: "A", mensagem: "", giftId: "x", giftNome: "X" });
-    addSentGift({ nomeRemetente: "B", mensagem: "", giftId: "y", giftNome: "Y" });
-    expect(getSentGifts().length).toBe(SEED_GIFTS.length + 2);
-  });
-
-  it("gera ids unicos mesmo em chamadas rapidas", () => {
-    const a = addSentGift({ nomeRemetente: "A", mensagem: "", giftId: "x", giftNome: "X" });
-    const b = addSentGift({ nomeRemetente: "B", mensagem: "", giftId: "y", giftNome: "Y" });
-    expect(a.id).not.toBe(b.id);
+  it("getSentGifts lança erro quando a resposta não é ok", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false }));
+    await expect(getSentGifts()).rejects.toThrow();
   });
 });

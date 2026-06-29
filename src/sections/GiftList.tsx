@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { GIFTS } from "../data/gifts";
 import { FloatingAsset } from "../components/FloatingAsset";
+import { playPop } from "../lib/sounds";
 import styles from "./GiftList.module.css";
 
 const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -27,7 +28,7 @@ export function GiftList() {
 
       <div className={styles.head}>
         <h2 className={styles.titulo}>Escolha um presente</h2>
-        <p className={styles.sub}>e mande uma mensagem para a Catarina e a Lúcia 💛</p>
+        <p className={styles.sub}>e mande uma mensagem para a Catarina e a Lucia 💛</p>
       </div>
 
       <div className={styles.grid}>
@@ -39,7 +40,10 @@ export function GiftList() {
             whileHover={{ scale: 1.05, rotate: 0 }}
             whileTap={{ scale: 0.96 }}
             transition={{ type: "spring", stiffness: 300, damping: 18 }}
-            onClick={() => navigate(`/presente/${g.id}`)}
+            onClick={() => {
+              playPop();
+              navigate(`/presente/${g.id}`);
+            }}
           >
             {WASHI[i] && (
               <span
