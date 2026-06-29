@@ -29,6 +29,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.status(405).json({ error: "method not allowed" });
   } catch (err) {
     console.error("[api/gifts]", err);
-    res.status(500).json({ error: "erro no servidor" });
+    res.status(500).json({ error: "erro no servidor", detail: err instanceof Error ? err.message : String(err) });
   }
 }

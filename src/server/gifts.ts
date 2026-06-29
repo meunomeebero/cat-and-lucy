@@ -1,5 +1,5 @@
 import { desc } from "drizzle-orm";
-import { db } from "./db";
+import { getDb } from "./db";
 import { gifts } from "./schema";
 
 export type GiftRow = {
@@ -30,12 +30,12 @@ function toRow(r: typeof gifts.$inferSelect): GiftRow {
 }
 
 export async function listGifts(): Promise<GiftRow[]> {
-  const rows = await db.select().from(gifts).orderBy(desc(gifts.criadoEm));
+  const rows = await getDb().select().from(gifts).orderBy(desc(gifts.criadoEm));
   return rows.map(toRow);
 }
 
 export async function createGift(input: NewGift): Promise<GiftRow> {
-  const [row] = await db
+  const [row] = await getDb()
     .insert(gifts)
     .values({
       nomeRemetente: input.nomeRemetente,

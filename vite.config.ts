@@ -1,4 +1,5 @@
 /// <reference types="vitest/config" />
+import "dotenv/config"; // carrega .env p/ o plugin de API em dev (DATABASE_URL etc.)
 import { defineConfig, type Plugin, type ViteDevServer } from "vite";
 import react from "@vitejs/plugin-react";
 import type { IncomingMessage } from "node:http";
