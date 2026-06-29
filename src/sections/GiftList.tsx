@@ -6,6 +6,11 @@ import styles from "./GiftList.module.css";
 
 const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
+const ROT = [-3, 2.5, -2, 3, -2.5, 2];
+const DY = [7, -5, 9, -3, 5, -7];
+// washi tape em alguns cards (índice -> cor)
+const WASHI: Record<number, string> = { 0: "washiRosa", 3: "washiLilas", 4: "washiAmarelo" };
+
 export function GiftList() {
   const navigate = useNavigate();
 
@@ -24,12 +29,13 @@ export function GiftList() {
           <motion.button
             key={g.id}
             className={styles.card}
-            initial={{ rotate: i % 2 === 0 ? -2 : 2 }}
+            initial={{ rotate: ROT[i % ROT.length], y: DY[i % DY.length] }}
             whileHover={{ scale: 1.05, rotate: 0 }}
             whileTap={{ scale: 0.96 }}
             transition={{ type: "spring", stiffness: 300, damping: 18 }}
             onClick={() => navigate(`/presente/${g.id}`)}
           >
+            {WASHI[i] && <span className={`${styles.washi} ${styles[WASHI[i]]}`} aria-hidden />}
             <img src={g.asset} alt={g.nome} className={styles.cardImg} />
             <span className={styles.cardNome}>{g.nome}</span>
             <span className={styles.cardPreco}>{brl(g.preco)}</span>

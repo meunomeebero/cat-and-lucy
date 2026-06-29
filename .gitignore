@@ -4,3 +4,4 @@ dist
 .context
 *.local
 .DS_Store
+.gstack/

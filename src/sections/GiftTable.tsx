@@ -20,8 +20,12 @@ export function GiftTable() {
 
   return (
     <section className={styles.section} id="mesa">
-      <FloatingAsset src="/assets/nuvem-1.png" width={130} className={styles.deco1} duration={6} floatRange={10} />
-      <FloatingAsset src="/assets/estrela-1.png" width={42} className={styles.deco2} duration={3} delay={0.5} />
+      <FloatingAsset src="/assets/nuvem-1.png" width={120} className={styles.deco1} duration={6} floatRange={10} />
+      <FloatingAsset src="/assets/estrela-1.png" width={40} className={styles.deco2} duration={3} delay={0.5} />
+      <FloatingAsset src="/assets/estrela-2.png" width={34} className={styles.deco3} duration={3.4} delay={0.2} />
+      <FloatingAsset src="/assets/brilho-1.png" width={30} className={styles.deco4} duration={2.8} delay={0.8} />
+      <FloatingAsset src="/assets/confete-1.png" width={90} className={styles.deco5} duration={5} delay={0.3} floatRange={8} />
+      <FloatingAsset src="/assets/balao-amarelo.png" width={56} className={styles.deco6} duration={5.5} delay={0.6} floatRange={14} />
 
       <div className={styles.head}>
         <h2 className={styles.titulo}>Mesa de presentes</h2>

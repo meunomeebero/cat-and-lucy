@@ -72,4 +72,8 @@
 }
 
 .deco1 { position: absolute; top: 10%; left: 5%; z-index: 1; }
-.deco2 { position: absolute; bottom: 12%; right: 7%; z-index: 1; }
+.deco2 { position: absolute; bottom: 14%; right: 7%; z-index: 1; }
+.deco3 { position: absolute; top: 18%; right: 12%; z-index: 1; }
+.deco4 { position: absolute; bottom: 24%; left: 13%; z-index: 1; }
+.deco5 { position: absolute; top: 28%; left: 18%; z-index: 1; }
+.deco6 { position: absolute; top: 14%; left: 44%; z-index: 1; }
