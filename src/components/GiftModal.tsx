@@ -34,7 +34,7 @@ export function GiftModal({ gift, onClose }: GiftModalProps) {
               ×
             </button>
             <div className={styles.avatarWrap}>
-              <Avatar foto={gift.foto} nome={gift.nomeRemetente} size={84} />
+              <Avatar nome={gift.nomeRemetente} size={84} />
             </div>
             <h3 className={styles.titulo}>Presente da {gift.nomeRemetente}</h3>
             <img

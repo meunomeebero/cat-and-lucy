@@ -56,7 +56,7 @@ export function GiftTable() {
               onClick={() => setSel(g)}
             >
               <span className={styles.avatarOver}>
-                <Avatar foto={g.foto} nome={g.nomeRemetente} size={46} />
+                <Avatar nome={g.nomeRemetente} size={46} />
               </span>
               <img src={asset} alt={g.giftNome} className={styles.giftImg} />
               <span className={styles.itemNome}>{g.nomeRemetente}</span>

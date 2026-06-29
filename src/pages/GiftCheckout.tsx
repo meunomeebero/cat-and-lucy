@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent } from "react";
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "motion/react";
 import { getGiftById } from "../data/gifts";
@@ -16,7 +16,6 @@ export default function GiftCheckout() {
 
   const [nome, setNome] = useState("");
   const [mensagem, setMensagem] = useState("");
-  const [foto, setFoto] = useState<string | undefined>(undefined);
   const [erro, setErro] = useState(false);
   const [enviado, setEnviado] = useState(false);
 
@@ -40,14 +39,6 @@ export default function GiftCheckout() {
     txid: gift.id,
   });
 
-  const onFoto = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setFoto(reader.result as string);
-    reader.readAsDataURL(file);
-  };
-
   const onConcluir = () => {
     if (!nome.trim()) {
       setErro(true);
@@ -56,7 +47,6 @@ export default function GiftCheckout() {
     addSentGift({
       nomeRemetente: nome.trim(),
       mensagem: mensagem.trim(),
-      foto,
       giftId: gift.id,
       giftNome: gift.nome,
     });
@@ -87,8 +77,6 @@ export default function GiftCheckout() {
       </motion.main>
     );
   }
-
-  const inicial = nome.trim() ? nome.trim()[0].toUpperCase() : "?";
 
   return (
     <main className={styles.page}>
@@ -138,21 +126,6 @@ export default function GiftCheckout() {
               value={mensagem}
               onChange={(e) => setMensagem(e.target.value)}
             />
-          </div>
-
-          <div className={styles.campo}>
-            <span className={styles.campoLabel}>Sua foto (opcional)</span>
-            <div className={styles.fotoRow}>
-              {foto ? (
-                <img src={foto} alt="sua foto" className={styles.avatarPreview} />
-              ) : (
-                <span className={`${styles.avatarPreview} ${styles.avatarVazio}`}>{inicial}</span>
-              )}
-              <label className={styles.fotoBtn}>
-                {foto ? "trocar foto" : "adicionar foto"}
-                <input type="file" accept="image/*" onChange={onFoto} className={styles.fileHidden} />
-              </label>
-            </div>
           </div>
         </div>
 

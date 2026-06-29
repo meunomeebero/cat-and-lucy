@@ -116,42 +116,6 @@
   color: var(--rosa-forte);
 }
 
-/* foto */
-.fotoRow {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-.avatarPreview {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  object-fit: cover;
-  background-color: var(--lilas);
-  flex-shrink: 0;
-}
-.avatarVazio {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-script);
-  font-size: 1.6rem;
-  color: var(--tinta);
-}
-.fotoBtn {
-  font-family: var(--font-corpo);
-  font-weight: 600;
-  font-size: 0.92rem;
-  color: var(--tinta);
-  background-color: var(--lilas);
-  border-radius: 999px;
-  padding: 0.55rem 1.1rem;
-  cursor: pointer;
-}
-.fileHidden {
-  display: none;
-}
-
 /* concluir */
 .concluir {
   font-family: var(--font-script);

@@ -2,7 +2,6 @@ export type SentGift = {
   id: string;
   nomeRemetente: string;
   mensagem: string;
-  foto?: string;
   giftId: string;
   giftNome: string;
   criadoEm: number;
