@@ -54,14 +54,11 @@ export function GiftList() {
             )}
             <img src={g.asset} alt={g.nome} className={styles.cardImg} />
             <span className={styles.cardNome}>{g.nome}</span>
+            {g.empresa && <span className={styles.cardEmpresa}>{g.empresa}</span>}
             <span className={styles.cardPreco}>{brl(g.preco)}</span>
           </motion.button>
         ))}
       </div>
-
-      {/* confete/brilho "por cima" dos cards (sem bloquear clique) */}
-      <FloatingAsset src="/assets/confete-1.png" width={62} className={styles.over1} duration={4.5} delay={0.3} floatRange={6} />
-      <FloatingAsset src="/assets/estrela-1.png" width={30} className={styles.over2} duration={3.2} delay={0.7} />
     </section>
   );
 }

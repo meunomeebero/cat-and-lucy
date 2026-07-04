@@ -60,8 +60,16 @@
 .giftNome {
   font-family: var(--font-corpo);
   font-weight: 600;
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   color: var(--tinta);
+  line-height: 1.2;
+}
+.giftEmpresa {
+  font-family: var(--font-corpo);
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: var(--tinta);
+  opacity: 0.72;
 }
 .giftPreco {
   font-family: var(--font-script);

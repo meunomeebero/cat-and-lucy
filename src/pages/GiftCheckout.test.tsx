@@ -10,7 +10,7 @@ afterEach(() => {
 
 function renderCheckout() {
   return render(
-    <MemoryRouter initialEntries={["/presente/ursinho"]}>
+    <MemoryRouter initialEntries={["/presente/zoologico"]}>
       <Routes>
         <Route path="/presente/:id" element={<GiftCheckout />} />
       </Routes>

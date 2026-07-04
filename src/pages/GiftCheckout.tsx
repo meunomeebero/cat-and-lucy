@@ -55,7 +55,7 @@ export default function GiftCheckout() {
         nomeRemetente: nome.trim(),
         mensagem: mensagem.trim(),
         giftId: gift.id,
-        giftNome: gift.nome,
+        giftNome: gift.empresa ? `${gift.nome} — ${gift.empresa}` : gift.nome,
       });
       playTwinkle();
       setEnviado(true);
@@ -106,6 +106,7 @@ export default function GiftCheckout() {
           <div className={styles.giftInfo}>
             <span className={styles.giftLabel}>Presente escolhido</span>
             <span className={styles.giftNome}>{gift.nome}</span>
+            {gift.empresa && <span className={styles.giftEmpresa}>{gift.empresa}</span>}
             <span className={styles.giftPreco}>{brl(gift.preco)}</span>
           </div>
         </div>
