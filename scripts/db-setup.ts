@@ -11,8 +11,8 @@ await sql`
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     nome_remetente text NOT NULL,
     mensagem text NOT NULL DEFAULT '',
-    gift_id text NOT NULL,
-    gift_nome text NOT NULL,
+    itens jsonb NOT NULL DEFAULT '[]',
+    total integer NOT NULL DEFAULT 0,
     criado_em timestamptz NOT NULL DEFAULT now()
   )
 `;

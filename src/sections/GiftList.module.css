@@ -127,3 +127,66 @@
 /* confete/brilho POR CIMA dos cards (profundidade de campo), sem bloquear clique */
 .over1 { position: absolute; top: 46%; left: 30%; z-index: 5; pointer-events: none; }
 .over2 { position: absolute; top: 38%; right: 28%; z-index: 5; pointer-events: none; }
+
+/* --- carrinho: seleção de quantidade --- */
+.cardOn {
+  filter: saturate(1.18);
+}
+.badge {
+  position: absolute;
+  top: -9px;
+  right: -7px;
+  min-width: 27px;
+  height: 27px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background-color: var(--rosa-forte);
+  color: var(--creme);
+  font-family: var(--font-corpo);
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4;
+}
+.addBtn {
+  margin-top: 0.5rem;
+  font-family: var(--font-corpo);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--tinta);
+  background-color: var(--creme);
+  border-radius: 999px;
+  padding: 0.5rem 1.3rem;
+}
+.stepper {
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  background-color: var(--creme);
+  border-radius: 999px;
+  padding: 0.25rem 0.4rem;
+}
+.stepBtn {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: var(--rosa);
+  color: var(--tinta);
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.stepQtd {
+  font-family: var(--font-corpo);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--tinta);
+  min-width: 1.2rem;
+  text-align: center;
+}

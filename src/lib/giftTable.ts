@@ -1,11 +1,19 @@
-// Client da mesa de presentes: fala com a API serverless (/api/gifts), que persiste
-// no Postgres (Neon). Sem mocks, sem localStorage — compartilhado entre todos.
+// Client da mesa de presentes: fala com a API (/api/gifts), que persiste no Postgres (Neon).
+// Um envio (de uma família) tem VÁRIOS itens com quantidade + um total.
+export type SubmissionItem = {
+  giftId: string;
+  nome: string;
+  empresa?: string;
+  preco: number;
+  quantidade: number;
+};
+
 export type SentGift = {
   id: string;
   nomeRemetente: string;
   mensagem: string;
-  giftId: string;
-  giftNome: string;
+  itens: SubmissionItem[];
+  total: number;
   criadoEm: number;
 };
 
@@ -23,6 +31,6 @@ export async function addSentGift(input: NewGift): Promise<SentGift> {
     headers: { "content-type": "application/json" },
     body: JSON.stringify(input),
   });
-  if (!res.ok) throw new Error("Falha ao enviar o presente");
+  if (!res.ok) throw new Error("Falha ao enviar os presentes");
   return (await res.json()) as SentGift;
 }

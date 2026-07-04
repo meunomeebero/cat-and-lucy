@@ -1,10 +1,9 @@
 import { AnimatePresence, motion } from "motion/react";
 import type { SentGift } from "../lib/giftTable";
-import { getGiftById } from "../data/gifts";
 import { Avatar } from "./Avatar";
 import styles from "./GiftModal.module.css";
 
-const FALLBACK = "/assets/presente-1.png";
+const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 export type GiftModalProps = {
   gift: SentGift | null;
@@ -37,12 +36,19 @@ export function GiftModal({ gift, onClose }: GiftModalProps) {
               <Avatar nome={gift.nomeRemetente} size={84} />
             </div>
             <h3 className={styles.titulo}>Presente da {gift.nomeRemetente}</h3>
-            <img
-              src={getGiftById(gift.giftId)?.asset ?? FALLBACK}
-              alt={gift.giftNome}
-              className={styles.giftImg}
-            />
-            <p className={styles.giftNome}>{gift.giftNome}</p>
+
+            <ul className={styles.itens}>
+              {gift.itens.map((it, idx) => (
+                <li key={idx} className={styles.itemLi}>
+                  <span className={styles.itemQtdNome}>
+                    {it.quantidade}× {it.nome}
+                  </span>
+                  <span className={styles.itemVal}>{brl(it.preco * it.quantidade)}</span>
+                </li>
+              ))}
+            </ul>
+
+            <p className={styles.total}>Total: {brl(gift.total)}</p>
             {gift.mensagem && <p className={styles.mensagem}>“{gift.mensagem}”</p>}
           </motion.div>
         </motion.div>

@@ -51,18 +51,44 @@
   line-height: 1;
 }
 
-.giftImg {
-  width: 96px;
-  height: 96px;
-  object-fit: contain;
-  margin-top: 0.3rem;
+.itens {
+  list-style: none;
+  width: 100%;
+  margin-top: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
 }
-
-.giftNome {
+.itemLi {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.8rem;
+  background-color: var(--bege);
+  border-radius: 14px;
+  padding: 0.5rem 0.8rem;
+}
+.itemQtdNome {
   font-family: var(--font-corpo);
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: var(--tinta);
+  text-align: left;
+}
+.itemVal {
+  font-family: var(--font-corpo);
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--tinta);
+  opacity: 0.8;
+  white-space: nowrap;
+}
+.total {
+  font-family: var(--font-script);
+  font-weight: 700;
+  font-size: 1.6rem;
+  color: var(--rosa-forte);
+  margin-top: 0.6rem;
 }
 
 .mensagem {

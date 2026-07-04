@@ -1,0 +1,41 @@
+.bar {
+  position: fixed;
+  bottom: 1.4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  background-color: var(--rosa-forte);
+  color: var(--creme);
+  border-radius: 999px;
+  padding: 0.7rem 1.1rem 0.7rem 0.7rem;
+  font-family: var(--font-corpo);
+  max-width: calc(100vw - 2rem);
+}
+
+.count {
+  min-width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: var(--creme);
+  color: var(--rosa-forte);
+  font-weight: 700;
+  font-size: 1.05rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.label {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.total {
+  font-family: var(--font-script);
+  font-weight: 700;
+  font-size: 1.4rem;
+  line-height: 1;
+}

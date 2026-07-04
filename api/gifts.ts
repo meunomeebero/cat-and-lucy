@@ -1,18 +1,25 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
-import { pgTable, uuid, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, timestamp, jsonb, integer } from "drizzle-orm/pg-core";
 import { desc } from "drizzle-orm";
 
-// Tudo num arquivo só (sem imports de arquivos locais) para a função empacotar
-// corretamente na Vercel — só dependências de node_modules, que funcionam no runtime.
+// Arquivo único (sem imports de arquivos locais) para a função empacotar na Vercel.
+
+type SubmissionItem = {
+  giftId: string;
+  nome: string;
+  empresa?: string;
+  preco: number;
+  quantidade: number;
+};
 
 export const gifts = pgTable("gifts", {
   id: uuid("id").primaryKey().defaultRandom(),
   nomeRemetente: text("nome_remetente").notNull(),
   mensagem: text("mensagem").notNull().default(""),
-  giftId: text("gift_id").notNull(),
-  giftNome: text("gift_nome").notNull(),
+  itens: jsonb("itens").$type<SubmissionItem[]>().notNull().default([]),
+  total: integer("total").notNull().default(0),
   criadoEm: timestamp("criado_em", { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -20,8 +27,8 @@ export type GiftRow = {
   id: string;
   nomeRemetente: string;
   mensagem: string;
-  giftId: string;
-  giftNome: string;
+  itens: SubmissionItem[];
+  total: number;
   criadoEm: number;
 };
 
@@ -40,8 +47,8 @@ function toRow(r: typeof gifts.$inferSelect): GiftRow {
     id: r.id,
     nomeRemetente: r.nomeRemetente,
     mensagem: r.mensagem,
-    giftId: r.giftId,
-    giftNome: r.giftNome,
+    itens: r.itens ?? [],
+    total: r.total,
     criadoEm: r.criadoEm.getTime(),
   };
 }
@@ -54,10 +61,20 @@ export async function listGifts(): Promise<GiftRow[]> {
 export async function createGift(input: {
   nomeRemetente: string;
   mensagem: string;
-  giftId: string;
-  giftNome: string;
+  itens: SubmissionItem[];
 }): Promise<GiftRow> {
-  const [row] = await getDb().insert(gifts).values(input).returning();
+  const itens: SubmissionItem[] = input.itens.map((i) => ({
+    giftId: String(i.giftId),
+    nome: String(i.nome),
+    empresa: i.empresa ? String(i.empresa) : undefined,
+    preco: Number(i.preco) || 0,
+    quantidade: Math.max(1, Math.min(99, Math.round(Number(i.quantidade) || 1))),
+  }));
+  const total = itens.reduce((s, i) => s + i.preco * i.quantidade, 0);
+  const [row] = await getDb()
+    .insert(gifts)
+    .values({ nomeRemetente: input.nomeRemetente, mensagem: input.mensagem, itens, total })
+    .returning();
   return toRow(row);
 }
 
@@ -72,15 +89,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body ?? {};
       const nomeRemetente = String(body.nomeRemetente ?? "").trim();
       const mensagem = String(body.mensagem ?? "").trim();
-      const giftId = String(body.giftId ?? "");
-      const giftNome = String(body.giftNome ?? "");
+      const itens = Array.isArray(body.itens) ? body.itens : [];
 
-      if (!nomeRemetente || !giftId) {
-        res.status(400).json({ error: "nomeRemetente e giftId são obrigatórios" });
+      if (!nomeRemetente || itens.length === 0) {
+        res.status(400).json({ error: "nomeRemetente e ao menos um item são obrigatórios" });
         return;
       }
 
-      res.status(201).json(await createGift({ nomeRemetente, mensagem, giftId, giftNome }));
+      res.status(201).json(await createGift({ nomeRemetente, mensagem, itens }));
       return;
     }
 

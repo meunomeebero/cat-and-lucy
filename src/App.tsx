@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import Lenis from "lenis";
 import Home from "./pages/Home";
-import GiftCheckout from "./pages/GiftCheckout";
+import CartCheckout from "./pages/CartCheckout";
 
 export default function App() {
   useEffect(() => {
@@ -22,7 +22,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/presente/:id" element={<GiftCheckout />} />
+      <Route path="/finalizar" element={<CartCheckout />} />
     </Routes>
   );
 }

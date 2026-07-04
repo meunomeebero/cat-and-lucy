@@ -1,21 +1,26 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { getSentGifts, type SentGift } from "../lib/giftTable";
-import { getGiftById } from "../data/gifts";
 import { Avatar } from "../components/Avatar";
 import { GiftModal } from "../components/GiftModal";
 import { FloatingAsset } from "../components/FloatingAsset";
 import { playPop } from "../lib/sounds";
 import styles from "./GiftTable.module.css";
 
-const FALLBACK = "/assets/presente-1.png";
+// Cada envio de uma família vira uma caixa de presente na mesa.
+const GIFT_BOXES = [
+  "/assets/presente-1.png",
+  "/assets/presente-2.png",
+  "/assets/presente-3.png",
+  "/assets/presente-4.png",
+  "/assets/presente-5.png",
+  "/assets/presente-6.png",
+];
 const ROTACOES = [-5, 4, -3, 6, -6, 3, 5, -4, 2, -2];
-const STAGGER = [0, 30, 10, 36, 4, 22, 14, 2, 26, 8]; // desalinha verticalmente
+const STAGGER = [0, 30, 10, 36, 4, 22, 14, 2, 26, 8];
 const ESCALAS = [1, 0.92, 1.07, 0.96, 1.04, 0.9, 1.02, 0.94, 1.06, 0.98];
 
-// Performance: abaixo de FLOAT_THRESHOLD presentes, todos flutuam. Acima, só um
-// subconjunto distribuído flutua (no máx. ~MAX_FLOATERS) — visual quase idêntico,
-// mas o número de animações simultâneas para de crescer (suave em celular fraco).
+// Performance: acima de FLOAT_THRESHOLD envios, só um subconjunto distribuído flutua.
 const FLOAT_THRESHOLD = 40;
 const MAX_FLOATERS = 24;
 
@@ -63,7 +68,7 @@ export function GiftTable() {
           {gifts.map((g, i) => {
             const rot = ROTACOES[i % ROTACOES.length];
             const sc = ESCALAS[i % ESCALAS.length];
-            const asset = getGiftById(g.giftId)?.asset ?? FALLBACK;
+            const asset = GIFT_BOXES[i % GIFT_BOXES.length];
             const floating = total <= FLOAT_THRESHOLD || i % stride === 0;
             return (
               <motion.button
@@ -88,7 +93,7 @@ export function GiftTable() {
                 <span className={styles.avatarOver}>
                   <Avatar nome={g.nomeRemetente} size={46} />
                 </span>
-                <img src={asset} alt={g.giftNome} className={styles.giftImg} />
+                <img src={asset} alt={`presente de ${g.nomeRemetente}`} className={styles.giftImg} />
                 <span className={styles.itemNome}>{g.nomeRemetente}</span>
               </motion.button>
             );
