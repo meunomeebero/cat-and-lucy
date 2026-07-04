@@ -27,7 +27,7 @@ export function GiftList() {
 
       <div className={styles.head}>
         <h2 className={styles.titulo}>Escolha os presentes</h2>
-        <p className={styles.sub}>para a Catarina e a Lucia 💛 escolha quantos quiser (um pra cada!)</p>
+        <p className={styles.sub}>para a Catarina e a Lucia 💛 escolha quantos quiser</p>
       </div>
 
       <div className={styles.grid}>
