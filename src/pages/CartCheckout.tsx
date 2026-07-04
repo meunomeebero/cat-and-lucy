@@ -20,6 +20,43 @@ export default function CartCheckout() {
   const [enviado, setEnviado] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [erroEnvio, setErroEnvio] = useState(false);
+  const [cartaoLoading, setCartaoLoading] = useState(false);
+  const [erroCartao, setErroCartao] = useState(false);
+
+  const itensParaEnvio = () =>
+    linhas.map((l) => ({
+      giftId: l.gift.id,
+      nome: l.gift.nome,
+      empresa: l.gift.empresa,
+      preco: l.gift.preco,
+      quantidade: l.quantidade,
+    }));
+
+  // Cartão parcelado via Asaas: cria a cobrança e redireciona pro checkout hospedado.
+  const onCartao = async () => {
+    if (!nome.trim()) {
+      setErro(true);
+      return;
+    }
+    playPop();
+    setCartaoLoading(true);
+    setErroCartao(false);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ nomeRemetente: nome.trim(), mensagem: mensagem.trim(), itens: itensParaEnvio() }),
+      });
+      if (!res.ok) throw new Error("checkout falhou");
+      const data = (await res.json()) as { invoiceUrl?: string | null };
+      if (!data.invoiceUrl) throw new Error("sem invoiceUrl");
+      limpar();
+      window.location.href = data.invoiceUrl; // vai pro checkout do Asaas (escolhe as parcelas lá)
+    } catch {
+      setErroCartao(true);
+      setCartaoLoading(false);
+    }
+  };
 
   const onConcluir = async () => {
     if (!nome.trim()) {
@@ -197,17 +234,39 @@ export default function CartCheckout() {
           <span className={styles.totalValor}>{brl(total)}</span>
         </div>
 
-        <PixBox payload={payload} chave="036.417.452-84" valor={total} favorecido="Roberto Rocha da Costa Junior" />
+        <div className={styles.metodos}>
+          <h3 className={styles.metodosTitulo}>Como quer pagar?</h3>
 
-        <motion.button
-          className={styles.concluir}
-          whileTap={{ scale: 0.97 }}
-          onClick={onConcluir}
-          disabled={enviando}
-        >
-          {enviando ? "Enviando..." : "Enviar presentes"}
-        </motion.button>
-        {erroEnvio && <span className={styles.aviso}>Ops, não consegui enviar agora. Tenta de novo? 💛</span>}
+          <div className={styles.metodo}>
+            <span className={styles.metodoTag}>Pix · na hora, sem taxa</span>
+            <PixBox payload={payload} chave="036.417.452-84" valor={total} favorecido="Roberto Rocha da Costa Junior" />
+            <motion.button
+              className={styles.concluir}
+              whileTap={{ scale: 0.97 }}
+              onClick={onConcluir}
+              disabled={enviando}
+            >
+              {enviando ? "Enviando..." : "Já paguei no Pix — enviar presentes"}
+            </motion.button>
+            {erroEnvio && <span className={styles.aviso}>Ops, não consegui enviar agora. Tenta de novo? 💛</span>}
+          </div>
+
+          <div className={styles.metodo}>
+            <span className={styles.metodoTag}>Cartão · parcele no crédito</span>
+            <motion.button
+              className={styles.cartaoBtn}
+              whileTap={{ scale: 0.97 }}
+              onClick={onCartao}
+              disabled={cartaoLoading}
+            >
+              {cartaoLoading ? "Abrindo pagamento..." : `Pagar ${brl(total)} no cartão`}
+            </motion.button>
+            <p className={styles.recebedor}>Recebedor: BEROLAB LTDA · CNPJ 61.026.871/0001-79</p>
+            {erroCartao && (
+              <span className={styles.aviso}>Não consegui abrir o pagamento no cartão. Tenta de novo? 💛</span>
+            )}
+          </div>
+        </div>
       </div>
     </main>
   );

@@ -33,7 +33,7 @@ it("mostra os itens do carrinho, o total, e conclui com POST /api/gifts", async 
   expect(screen.getAllByText(/140,00/).length).toBeGreaterThan(0); // total 2 x 70
 
   fireEvent.change(screen.getByPlaceholderText(/Família/i), { target: { value: "Família Souza" } });
-  fireEvent.click(screen.getByText("Enviar presentes"));
+  fireEvent.click(screen.getByText(/já paguei no pix/i));
 
   expect(await screen.findByText(/Presentes enviados/i)).toBeInTheDocument();
   const body = JSON.parse((fetchMock.mock.calls[0][1] as RequestInit).body as string);
