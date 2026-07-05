@@ -360,3 +360,49 @@
   max-width: 440px;
   align-self: center;
 }
+
+/* esqueleto do Pix (placeholder até gerar) */
+.pixSkeleton {
+  width: 220px;
+  height: 220px;
+  max-width: 72vw;
+  background-color: var(--creme);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.pixSkeletonTxt {
+  font-family: var(--font-corpo);
+  font-size: 0.9rem;
+  color: var(--tinta);
+  opacity: 0.55;
+  text-align: center;
+}
+/* ações em texto (gerar pix / pagar com cartão) */
+.acoesTexto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
+.linkBtn {
+  font-family: var(--font-corpo);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--tinta-rosa);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 0.3rem 0.2rem;
+}
+.linkBtn:disabled {
+  opacity: 0.6;
+}
+.ou {
+  font-family: var(--font-corpo);
+  font-size: 0.9rem;
+  color: var(--tinta);
+  opacity: 0.6;
+}

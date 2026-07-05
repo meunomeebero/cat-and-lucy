@@ -32,7 +32,7 @@ it("Gerar Pix sem CPF válido → mostra erro e NÃO chama a API", () => {
   vi.stubGlobal("fetch", fetchMock);
   renderWithCart({ zoologico: 1 });
   fireEvent.change(screen.getByPlaceholderText(/Família/i), { target: { value: "Família Souza" } });
-  fireEvent.click(screen.getByText("Gerar Pix"));
+  fireEvent.click(screen.getByText(/gerar pix/i));
   expect(screen.getByText(/CPF válido/i)).toBeInTheDocument();
   expect(fetchMock).not.toHaveBeenCalled();
 });
@@ -46,9 +46,9 @@ it("Gerar Pix com CPF → POST /api/checkout (metodo pix) e mostra o QR", async 
   renderWithCart({ zoologico: 1 });
   fireEvent.change(screen.getByPlaceholderText(/Família/i), { target: { value: "Família Souza" } });
   fireEvent.change(screen.getByPlaceholderText(/000\.000/i), { target: { value: "12345678909" } });
-  fireEvent.click(screen.getByText("Gerar Pix"));
+  fireEvent.click(screen.getByText(/gerar pix/i));
 
-  expect(await screen.findByText(/Pague com Pix/i)).toBeInTheDocument();
+  expect(await screen.findByText(/copiar código Pix/i)).toBeInTheDocument();
   const body = JSON.parse((fetchMock.mock.calls[0][1] as RequestInit).body as string);
   expect(fetchMock.mock.calls[0][0]).toBe("/api/checkout");
   expect(body.metodo).toBe("pix");

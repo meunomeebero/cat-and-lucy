@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "motion/react";
 import { useCart } from "../lib/cart";
 import { FloatingAsset } from "../components/FloatingAsset";
 import { playPop } from "../lib/sounds";
@@ -50,7 +49,6 @@ export default function CartCheckout() {
       });
       const data = await res.json();
       if (!res.ok || !data.pix?.copiaECola) throw new Error();
-      limpar();
       setPixData(data.pix);
     } catch {
       setErro("Não consegui gerar o Pix agora. Confere o CPF e tenta de novo? 💛");
@@ -91,35 +89,6 @@ export default function CartCheckout() {
       /* ignora */
     }
   };
-
-  // ── Pix gerado: mostra o QR do Asaas ──
-  if (pixData) {
-    return (
-      <main className={styles.page}>
-        <FloatingAsset src="/assets/estrela-1.png" width={36} className={styles.deco1} duration={3} />
-        <FloatingAsset src="/assets/nuvem-2.png" width={100} className={styles.deco2} duration={5.5} delay={0.4} />
-        <div className={styles.wrap}>
-          <h1 className={styles.titulo}>Pague com Pix</h1>
-          <div className={styles.pixCard}>
-            {pixData.qrCodeImage && (
-              <img className={styles.pixQr} src={`data:image/png;base64,${pixData.qrCodeImage}`} alt="QR Code do Pix" />
-            )}
-            <button className={styles.copiaCola} onClick={copiarPix}>
-              {copiado ? "código copiado! 💛" : "copiar código Pix (copia e cola)"}
-            </button>
-            <p className={styles.recebedor}>{RECEBEDOR}</p>
-          </div>
-          <p className={styles.pixAviso}>
-            Assim que o pagamento for confirmado, seu presente aparece na mesa da Catarina e da Lucia. 💛
-          </p>
-          <div className={styles.obrigadoBotoes}>
-            <a href="/#mesa" className={styles.botaoMesa}>Ver a mesa</a>
-            <Link to="/" className={styles.botaoTopo}>Voltar pro começo</Link>
-          </div>
-        </div>
-      </main>
-    );
-  }
 
   // ── carrinho vazio ──
   if (linhas.length === 0) {
@@ -210,13 +179,37 @@ export default function CartCheckout() {
 
         <div className={styles.metodos}>
           <h3 className={styles.metodosTitulo}>Como quer pagar?</h3>
-          <motion.button className={styles.concluir} whileTap={{ scale: 0.97 }} onClick={gerarPix} disabled={pixLoading}>
-            {pixLoading ? "Gerando Pix..." : "Gerar Pix"}
-          </motion.button>
-          <motion.button className={styles.cartaoBtn} whileTap={{ scale: 0.97 }} onClick={pagarCartao} disabled={cartaoLoading}>
-            {cartaoLoading ? "Abrindo pagamento..." : `Pagar ${brl(total)} no cartão`}
-          </motion.button>
-          <p className={styles.recebedor}>{RECEBEDOR}</p>
+
+          {/* Pix na mesma posição de sempre: esqueleto até gerar, depois o QR do Asaas */}
+          <div className={styles.pixCard}>
+            {pixData ? (
+              <>
+                {pixData.qrCodeImage && (
+                  <img className={styles.pixQr} src={`data:image/png;base64,${pixData.qrCodeImage}`} alt="QR Code do Pix" />
+                )}
+                <button className={styles.copiaCola} onClick={copiarPix}>
+                  {copiado ? "código copiado! 💛" : "copiar código Pix (copia e cola)"}
+                </button>
+                <p className={styles.pixAviso}>Assim que o pagamento for confirmado, o presente aparece na mesa 💛</p>
+              </>
+            ) : (
+              <div className={styles.pixSkeleton}>
+                <span className={styles.pixSkeletonTxt}>{pixLoading ? "gerando o Pix..." : "seu QR do Pix aparece aqui"}</span>
+              </div>
+            )}
+            <p className={styles.recebedor}>{RECEBEDOR}</p>
+          </div>
+
+          {/* ações em texto */}
+          <div className={styles.acoesTexto}>
+            <button className={styles.linkBtn} onClick={gerarPix} disabled={pixLoading || cartaoLoading}>
+              {pixLoading ? "gerando pix..." : "gerar pix"}
+            </button>
+            <span className={styles.ou}>ou</span>
+            <button className={styles.linkBtn} onClick={pagarCartao} disabled={pixLoading || cartaoLoading}>
+              {cartaoLoading ? "abrindo cartão..." : "pagar com cartão"}
+            </button>
+          </div>
           {erro && <span className={styles.aviso}>{erro}</span>}
         </div>
       </div>
