@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../lib/cart";
 import { FloatingAsset } from "../components/FloatingAsset";
+import { PixSkeleton } from "../components/PixSkeleton";
 import { playPop } from "../lib/sounds";
 import styles from "./CartCheckout.module.css";
 
@@ -178,9 +179,7 @@ export default function CartCheckout() {
         </div>
 
         <div className={styles.metodos}>
-          <h3 className={styles.metodosTitulo}>Como quer pagar?</h3>
-
-          {/* Pix na mesma posição de sempre: esqueleto até gerar, depois o QR do Asaas */}
+          {/* Pix na mesma posição de sempre: mock rosa até gerar, depois o QR do Asaas */}
           <div className={styles.pixCard}>
             {pixData ? (
               <>
@@ -194,7 +193,7 @@ export default function CartCheckout() {
               </>
             ) : (
               <div className={styles.pixSkeleton}>
-                <span className={styles.pixSkeletonTxt}>{pixLoading ? "gerando o Pix..." : "seu QR do Pix aparece aqui"}</span>
+                <PixSkeleton />
               </div>
             )}
             <p className={styles.recebedor}>{RECEBEDOR}</p>
