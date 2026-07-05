@@ -50,6 +50,39 @@ function apiDevServer(): Plugin {
           res.end(JSON.stringify({ error: String(err) }));
         }
       });
+
+      // /api/checkout (Pix + cartão via Asaas) — reaproveita runCheckout da função
+      server.middlewares.use("/api/checkout", async (req, res) => {
+        res.setHeader("content-type", "application/json");
+        if (req.method !== "POST") {
+          res.statusCode = 405;
+          res.end(JSON.stringify({ error: "method not allowed" }));
+          return;
+        }
+        try {
+          const mod = await server.ssrLoadModule("/api/checkout.ts");
+          const raw = await readBody(req);
+          const body = raw ? JSON.parse(raw) : {};
+          try {
+            const result = await mod.runCheckout({
+              metodo: body.metodo === "pix" ? "pix" : "cartao",
+              nomeRemetente: String(body.nomeRemetente ?? ""),
+              cpf: body.cpf ? String(body.cpf) : undefined,
+              mensagem: String(body.mensagem ?? ""),
+              itens: Array.isArray(body.itens) ? body.itens : [],
+            });
+            res.statusCode = 201;
+            res.end(JSON.stringify(result));
+          } catch (e: any) {
+            res.statusCode = typeof e?.code === "number" ? e.code : 500;
+            res.end(JSON.stringify({ error: e?.message ?? "erro" }));
+          }
+        } catch (err) {
+          console.error("[api-dev checkout]", err);
+          res.statusCode = 500;
+          res.end(JSON.stringify({ error: String(err) }));
+        }
+      });
     },
   };
 }

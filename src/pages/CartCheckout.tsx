@@ -2,27 +2,31 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 import { useCart } from "../lib/cart";
-import { buildPixPayload } from "../lib/pix";
-import { addSentGift } from "../lib/giftTable";
-import { PixBox } from "../components/PixBox";
 import { FloatingAsset } from "../components/FloatingAsset";
-import { playPop, playTwinkle } from "../lib/sounds";
+import { playPop } from "../lib/sounds";
 import styles from "./CartCheckout.module.css";
 
 const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const RECEBEDOR = "Recebedor: BEROLAB LTDA · CNPJ 61.026.871/0001-79";
+
+type PixData = { qrCodeImage: string; copiaECola: string };
 
 export default function CartCheckout() {
   const { linhas, add, remove, total, totalItens, limpar } = useCart();
 
   const [nome, setNome] = useState("");
+  const [cpf, setCpf] = useState("");
   const [mensagem, setMensagem] = useState("");
-  const [erro, setErro] = useState(false);
-  const [enviado, setEnviado] = useState(false);
-  const [enviando, setEnviando] = useState(false);
-  const [erroEnvio, setErroEnvio] = useState(false);
+  const [erroNome, setErroNome] = useState(false);
+  const [erroCpf, setErroCpf] = useState(false);
+  const [pixLoading, setPixLoading] = useState(false);
   const [cartaoLoading, setCartaoLoading] = useState(false);
-  const [erroCartao, setErroCartao] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
+  const [pixData, setPixData] = useState<PixData | null>(null);
+  const [copiado, setCopiado] = useState(false);
 
+  const cpfNumeros = cpf.replace(/\D/g, "");
+  const cpfOk = cpfNumeros.length === 11 && !/^(\d)\1{10}$/.test(cpfNumeros);
   const itensParaEnvio = () =>
     linhas.map((l) => ({
       giftId: l.gift.id,
@@ -32,117 +36,109 @@ export default function CartCheckout() {
       quantidade: l.quantidade,
     }));
 
-  // Cartão parcelado via Asaas: cria a cobrança e redireciona pro checkout hospedado.
-  const onCartao = async () => {
-    if (!nome.trim()) {
-      setErro(true);
-      return;
-    }
+  const gerarPix = async () => {
+    setErro(null);
+    if (!nome.trim()) return setErroNome(true);
+    if (!cpfOk) return setErroCpf(true);
     playPop();
-    setCartaoLoading(true);
-    setErroCartao(false);
+    setPixLoading(true);
     try {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ nomeRemetente: nome.trim(), mensagem: mensagem.trim(), itens: itensParaEnvio() }),
+        body: JSON.stringify({ metodo: "pix", nomeRemetente: nome.trim(), cpf: cpfNumeros, mensagem: mensagem.trim(), itens: itensParaEnvio() }),
       });
-      if (!res.ok) throw new Error("checkout falhou");
-      const data = (await res.json()) as { invoiceUrl?: string | null };
-      if (!data.invoiceUrl) throw new Error("sem invoiceUrl");
+      const data = await res.json();
+      if (!res.ok || !data.pix?.copiaECola) throw new Error();
       limpar();
-      window.location.href = data.invoiceUrl; // vai pro checkout do Asaas (escolhe as parcelas lá)
+      setPixData(data.pix);
     } catch {
-      setErroCartao(true);
+      setErro("Não consegui gerar o Pix agora. Confere o CPF e tenta de novo? 💛");
+    } finally {
+      setPixLoading(false);
+    }
+  };
+
+  const pagarCartao = async () => {
+    setErro(null);
+    if (!nome.trim()) return setErroNome(true);
+    playPop();
+    setCartaoLoading(true);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ metodo: "cartao", nomeRemetente: nome.trim(), cpf: cpfOk ? cpfNumeros : undefined, mensagem: mensagem.trim(), itens: itensParaEnvio() }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.invoiceUrl) throw new Error();
+      limpar();
+      window.location.href = data.invoiceUrl;
+    } catch {
+      setErro("Não consegui abrir o pagamento no cartão. Tenta de novo? 💛");
       setCartaoLoading(false);
     }
   };
 
-  const onConcluir = async () => {
-    if (!nome.trim()) {
-      setErro(true);
-      return;
-    }
-    playPop();
-    setEnviando(true);
-    setErroEnvio(false);
+  const copiarPix = async () => {
+    if (!pixData) return;
     try {
-      await addSentGift({
-        nomeRemetente: nome.trim(),
-        mensagem: mensagem.trim(),
-        itens: linhas.map((l) => ({
-          giftId: l.gift.id,
-          nome: l.gift.nome,
-          empresa: l.gift.empresa,
-          preco: l.gift.preco,
-          quantidade: l.quantidade,
-        })),
-        total,
-      });
-      playTwinkle();
-      setEnviado(true);
-      limpar();
+      playPop();
+      await navigator.clipboard.writeText(pixData.copiaECola);
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 1800);
     } catch {
-      setErroEnvio(true);
-    } finally {
-      setEnviando(false);
+      /* ignora */
     }
   };
 
-  if (enviado) {
+  // ── Pix gerado: mostra o QR do Asaas ──
+  if (pixData) {
     return (
-      <motion.main
-        className={styles.obrigado}
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-      >
-        <FloatingAsset src="/assets/coroa-1.png" width={110} duration={4} />
-        <h1 className={styles.obrigadoTitulo}>Presentes enviados!</h1>
-        <p className={styles.obrigadoTexto}>
-          Muito obrigado, {nome.trim()}! Seus presentinhos já foram pra mesa da Catarina e da Lucia. 💛
-        </p>
-        <div className={styles.obrigadoBotoes}>
-          <a href="/#mesa" className={styles.botaoMesa}>
-            Ver a mesa de presentes
-          </a>
-          <Link to="/" className={styles.botaoTopo}>
-            Voltar pro começo
-          </Link>
+      <main className={styles.page}>
+        <FloatingAsset src="/assets/estrela-1.png" width={36} className={styles.deco1} duration={3} />
+        <FloatingAsset src="/assets/nuvem-2.png" width={100} className={styles.deco2} duration={5.5} delay={0.4} />
+        <div className={styles.wrap}>
+          <h1 className={styles.titulo}>Pague com Pix</h1>
+          <div className={styles.pixCard}>
+            {pixData.qrCodeImage && (
+              <img className={styles.pixQr} src={`data:image/png;base64,${pixData.qrCodeImage}`} alt="QR Code do Pix" />
+            )}
+            <button className={styles.copiaCola} onClick={copiarPix}>
+              {copiado ? "código copiado! 💛" : "copiar código Pix (copia e cola)"}
+            </button>
+            <p className={styles.recebedor}>{RECEBEDOR}</p>
+          </div>
+          <p className={styles.pixAviso}>
+            Assim que o pagamento for confirmado, seu presente aparece na mesa da Catarina e da Lucia. 💛
+          </p>
+          <div className={styles.obrigadoBotoes}>
+            <a href="/#mesa" className={styles.botaoMesa}>Ver a mesa</a>
+            <Link to="/" className={styles.botaoTopo}>Voltar pro começo</Link>
+          </div>
         </div>
-      </motion.main>
+      </main>
     );
   }
 
+  // ── carrinho vazio ──
   if (linhas.length === 0) {
     return (
       <main className={styles.naoAchou}>
         <FloatingAsset src="/assets/balao-lilas.png" width={80} duration={5} />
         <h1 className={styles.obrigadoTitulo}>Sua sacola está vazia</h1>
         <p className={styles.obrigadoTexto}>Escolha um ou mais presentes pra Catarina e a Lucia 💛</p>
-        <Link to="/#presentes" className={styles.botaoMesa}>
-          Escolher presentes
-        </Link>
+        <Link to="/#presentes" className={styles.botaoMesa}>Escolher presentes</Link>
       </main>
     );
   }
-
-  const payload = buildPixPayload({
-    key: "03641745284",
-    amount: total,
-    merchantName: "Roberto Rocha da Costa Junior",
-    merchantCity: "SAO JOSE CAMPOS",
-    txid: "PRESENTES",
-  });
 
   return (
     <main className={styles.page}>
       <FloatingAsset src="/assets/estrela-1.png" width={36} className={styles.deco1} duration={3} />
       <FloatingAsset src="/assets/nuvem-2.png" width={100} className={styles.deco2} duration={5.5} delay={0.4} />
 
-      <Link to="/#presentes" className={styles.voltar}>
-        ← escolher mais
-      </Link>
+      <Link to="/#presentes" className={styles.voltar}>← escolher mais</Link>
 
       <div className={styles.wrap}>
         <h1 className={styles.titulo}>Seus presentes</h1>
@@ -155,39 +151,13 @@ export default function CartCheckout() {
                 <span className={styles.itemNome}>{l.gift.nome}</span>
                 {l.gift.empresa && <span className={styles.itemEmpresa}>{l.gift.empresa}</span>}
                 <span className={styles.itemPreco}>{brl(l.gift.preco)} cada</span>
-                <button
-                  className={styles.remover}
-                  onClick={() => {
-                    playPop();
-                    remove(l.gift.id);
-                  }}
-                >
-                  remover
-                </button>
+                <button className={styles.remover} onClick={() => { playPop(); remove(l.gift.id); }}>remover</button>
               </div>
               <div className={styles.itemDireita}>
                 <div className={styles.stepper}>
-                  <button
-                    className={styles.stepBtn}
-                    aria-label="diminuir"
-                    onClick={() => {
-                      playPop();
-                      add(l.gift.id, -1);
-                    }}
-                  >
-                    −
-                  </button>
+                  <button className={styles.stepBtn} aria-label="diminuir" onClick={() => { playPop(); add(l.gift.id, -1); }}>−</button>
                   <span className={styles.stepQtd}>{l.quantidade}</span>
-                  <button
-                    className={styles.stepBtn}
-                    aria-label="aumentar"
-                    onClick={() => {
-                      playPop();
-                      add(l.gift.id);
-                    }}
-                  >
-                    +
-                  </button>
+                  <button className={styles.stepBtn} aria-label="aumentar" onClick={() => { playPop(); add(l.gift.id); }}>+</button>
                 </div>
                 <span className={styles.itemSubtotal}>{brl(l.gift.preco * l.quantidade)}</span>
               </div>
@@ -197,26 +167,32 @@ export default function CartCheckout() {
 
         <div className={styles.form}>
           <div className={styles.campo}>
-            <label className={styles.campoLabel} htmlFor="nome">
-              De quem são os presentes?
-            </label>
+            <label className={styles.campoLabel} htmlFor="nome">De quem são os presentes?</label>
             <input
               id="nome"
-              className={`${styles.input} ${erro ? styles.inputErro : ""}`}
+              className={`${styles.input} ${erroNome ? styles.inputErro : ""}`}
               placeholder="Ex.: Família Souza"
               value={nome}
-              onChange={(e) => {
-                setNome(e.target.value);
-                if (erro) setErro(false);
-              }}
+              onChange={(e) => { setNome(e.target.value); if (erroNome) setErroNome(false); }}
             />
-            {erro && <span className={styles.aviso}>Conta pra gente quem está mandando 💛</span>}
+            {erroNome && <span className={styles.aviso}>Conta pra gente quem está mandando 💛</span>}
           </div>
 
           <div className={styles.campo}>
-            <label className={styles.campoLabel} htmlFor="mensagem">
-              Mensagem para as meninas
-            </label>
+            <label className={styles.campoLabel} htmlFor="cpf">Seu CPF <span className={styles.campoHint}>(necessário para o Pix)</span></label>
+            <input
+              id="cpf"
+              inputMode="numeric"
+              className={`${styles.input} ${erroCpf ? styles.inputErro : ""}`}
+              placeholder="000.000.000-00"
+              value={cpf}
+              onChange={(e) => { setCpf(e.target.value); if (erroCpf) setErroCpf(false); }}
+            />
+            {erroCpf && <span className={styles.aviso}>Precisa de um CPF válido pra gerar o Pix 💛</span>}
+          </div>
+
+          <div className={styles.campo}>
+            <label className={styles.campoLabel} htmlFor="mensagem">Mensagem para as meninas</label>
             <textarea
               id="mensagem"
               className={styles.textarea}
@@ -228,44 +204,20 @@ export default function CartCheckout() {
         </div>
 
         <div className={styles.totalRow}>
-          <span className={styles.totalLabel}>
-            Total · {totalItens} {totalItens === 1 ? "item" : "itens"}
-          </span>
+          <span className={styles.totalLabel}>Total · {totalItens} {totalItens === 1 ? "item" : "itens"}</span>
           <span className={styles.totalValor}>{brl(total)}</span>
         </div>
 
         <div className={styles.metodos}>
           <h3 className={styles.metodosTitulo}>Como quer pagar?</h3>
-
-          <div className={styles.metodo}>
-            <span className={styles.metodoTag}>Pix · na hora, sem taxa</span>
-            <PixBox payload={payload} chave="036.417.452-84" valor={total} favorecido="Roberto Rocha da Costa Junior" />
-            <motion.button
-              className={styles.concluir}
-              whileTap={{ scale: 0.97 }}
-              onClick={onConcluir}
-              disabled={enviando}
-            >
-              {enviando ? "Enviando..." : "Já paguei no Pix — enviar presentes"}
-            </motion.button>
-            {erroEnvio && <span className={styles.aviso}>Ops, não consegui enviar agora. Tenta de novo? 💛</span>}
-          </div>
-
-          <div className={styles.metodo}>
-            <span className={styles.metodoTag}>Cartão · parcele no crédito</span>
-            <motion.button
-              className={styles.cartaoBtn}
-              whileTap={{ scale: 0.97 }}
-              onClick={onCartao}
-              disabled={cartaoLoading}
-            >
-              {cartaoLoading ? "Abrindo pagamento..." : `Pagar ${brl(total)} no cartão`}
-            </motion.button>
-            <p className={styles.recebedor}>Recebedor: BEROLAB LTDA · CNPJ 61.026.871/0001-79</p>
-            {erroCartao && (
-              <span className={styles.aviso}>Não consegui abrir o pagamento no cartão. Tenta de novo? 💛</span>
-            )}
-          </div>
+          <motion.button className={styles.concluir} whileTap={{ scale: 0.97 }} onClick={gerarPix} disabled={pixLoading}>
+            {pixLoading ? "Gerando Pix..." : "Gerar Pix"}
+          </motion.button>
+          <motion.button className={styles.cartaoBtn} whileTap={{ scale: 0.97 }} onClick={pagarCartao} disabled={cartaoLoading}>
+            {cartaoLoading ? "Abrindo pagamento..." : `Pagar ${brl(total)} no cartão`}
+          </motion.button>
+          <p className={styles.recebedor}>{RECEBEDOR}</p>
+          {erro && <span className={styles.aviso}>{erro}</span>}
         </div>
       </div>
     </main>

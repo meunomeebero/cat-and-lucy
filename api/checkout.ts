@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
-import { pgTable, uuid, text, timestamp, jsonb, numeric } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, jsonb, numeric } from "drizzle-orm/pg-core";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 
@@ -31,7 +31,7 @@ function getDb() {
   return _db;
 }
 
-// ── Asaas client (auto-contido) ──────────────────────────────────────────────
+// ── Asaas client ─────────────────────────────────────────────────────────────
 function asaasKey() {
   return (process.env.ASAAS_API_KEY || "").replace(/^\\+/, "");
 }
@@ -56,8 +56,7 @@ async function asaasFetch(path: string, init: RequestInit = {}): Promise<any> {
       });
       if (!res.ok) {
         const b = await res.text();
-        // retry só transitório; 4xx de validação aborta na hora
-        if (res.status === 408 || res.status === 429 || res.status >= 500) throw new Error(`transient ${res.status}: ${b.slice(0, 120)}`);
+        if (res.status === 408 || res.status === 429 || res.status >= 500) throw new Error(`transient ${res.status}`);
         throw new AsaasApiError(res.status, b);
       }
       return await res.json();
@@ -70,35 +69,118 @@ async function asaasFetch(path: string, init: RequestInit = {}): Promise<any> {
   throw lastErr;
 }
 
-async function findOrCreateCustomer(nome: string): Promise<string> {
+async function findOrCreateCustomer(nome: string, cpf?: string): Promise<string> {
   const c = await asaasFetch("/customers", {
     method: "POST",
-    body: JSON.stringify({ name: nome, notificationDisabled: true }),
+    body: JSON.stringify({ name: nome, cpfCnpj: cpf || undefined, notificationDisabled: true }),
   });
   return c.id as string;
 }
 
-// ── builder da cobrança (puro, exportado p/ teste) ───────────────────────────
+// ── helpers puros (exportados p/ teste) ──────────────────────────────────────
 export const CHARGE_DESCRIPTION = "Catarina e Lucia - Presente"; // NUNCA "créditos"/"bônus"
 
-export function buildChargeBody(customerId: string, valorReais: number, externalReference: string) {
+export function cpfDigits(v?: string) {
+  return (v ?? "").replace(/\D/g, "");
+}
+export function cpfValido(v?: string) {
+  const d = cpfDigits(v);
+  return d.length === 11 && !/^(\d)\1{10}$/.test(d);
+}
+
+export function buildChargeBody(
+  customerId: string,
+  valorReais: number,
+  externalReference: string,
+  billingType: "PIX" | "CREDIT_CARD",
+) {
   return {
     customer: customerId,
-    billingType: "CREDIT_CARD" as const,
-    value: valorReais, // REAIS, não centavos
+    billingType,
+    value: valorReais, // REAIS
     description: CHARGE_DESCRIPTION,
     externalReference, // uuid puro (isolamento por presença na nossa tabela)
     dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-    // SEM callback.successUrl (domínio não-whitelisted derruba 100% dos cartões, #16)
-    // SEM creditCard payload → Asaas devolve invoiceUrl (checkout hospedado, parcelas lá)
+    // SEM callback.successUrl (domínio não-whitelisted derruba o cartão, #16)
+    // SEM creditCard payload → cartão devolve invoiceUrl (checkout hospedado)
   };
 }
 
-async function createCharge(customerId: string, valorReais: number, externalReference: string) {
+async function createCharge(customerId: string, valor: number, ref: string, billingType: "PIX" | "CREDIT_CARD") {
   return asaasFetch("/payments", {
     method: "POST",
-    body: JSON.stringify(buildChargeBody(customerId, valorReais, externalReference)),
+    body: JSON.stringify(buildChargeBody(customerId, valor, ref, billingType)),
   }) as Promise<{ id: string; status: string; invoiceUrl?: string }>;
+}
+
+async function getPixQrCode(asaasId: string) {
+  const j = (await asaasFetch(`/payments/${asaasId}/pixQrCode`)) as { encodedImage?: string; payload?: string };
+  return { qrCodeImage: j.encodedImage ?? "", copiaECola: j.payload ?? "" };
+}
+
+export class CheckoutError extends Error {
+  constructor(public code: number, msg: string) {
+    super(msg);
+  }
+}
+
+export type CheckoutInput = {
+  metodo: "pix" | "cartao";
+  nomeRemetente: string;
+  cpf?: string;
+  mensagem?: string;
+  itens: Item[];
+};
+export type CheckoutResult = {
+  orderId: string;
+  status: string;
+  invoiceUrl?: string | null;
+  pix?: { qrCodeImage: string; copiaECola: string };
+};
+
+// Usado pelo handler da Vercel E pelo plugin de dev do Vite.
+export async function runCheckout(input: CheckoutInput): Promise<CheckoutResult> {
+  const db = getDb();
+  const nome = (input.nomeRemetente ?? "").trim();
+  const itens = Array.isArray(input.itens) ? input.itens : [];
+  const total = itens.reduce((s, i) => s + Number(i.preco) * Math.max(1, Math.round(Number(i.quantidade) || 1)), 0);
+
+  if (!nome || itens.length === 0 || total <= 0) throw new CheckoutError(400, "nome e ao menos um item são obrigatórios");
+  if (input.metodo === "pix" && !cpfValido(input.cpf)) throw new CheckoutError(400, "CPF inválido (necessário para o Pix)");
+
+  const orderId = randomUUID();
+  await db.insert(orders).values({
+    id: orderId,
+    externalReference: orderId,
+    status: "pending",
+    metodo: input.metodo === "pix" ? "asaas_pix" : "asaas_card",
+    valor: total.toFixed(2),
+    nomeRemetente: nome,
+    mensagem: (input.mensagem ?? "").trim(),
+    itens,
+  });
+
+  try {
+    const cpf = input.cpf ? cpfDigits(input.cpf) : undefined;
+    const customerId = await findOrCreateCustomer(nome, cpf);
+    const billingType = input.metodo === "pix" ? "PIX" : "CREDIT_CARD";
+    const charge = await createCharge(customerId, total, orderId, billingType);
+    await db.update(orders).set({ asaasId: charge.id, asaasCustomerId: customerId }).where(eq(orders.id, orderId));
+
+    if (input.metodo === "pix") {
+      const pix = await getPixQrCode(charge.id);
+      return { orderId, status: charge.status, pix };
+    }
+    return { orderId, status: charge.status, invoiceUrl: charge.invoiceUrl ?? null };
+  } catch (e) {
+    const validation = e instanceof AsaasApiError;
+    await db
+      .update(orders)
+      .set({ status: validation ? "abandoned" : "gateway_down" })
+      .where(eq(orders.id, orderId))
+      .catch(() => {});
+    throw new CheckoutError(validation ? 400 : 502, "não foi possível criar a cobrança");
+  }
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -107,51 +189,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.status(405).json({ error: "method not allowed" });
     return;
   }
-  const db = getDb();
-  let orderId = "";
   try {
     const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body ?? {};
-    const nomeRemetente = String(body.nomeRemetente ?? "").trim();
-    const mensagem = String(body.mensagem ?? "").trim();
-    const itens: Item[] = Array.isArray(body.itens) ? body.itens : [];
-    const total = itens.reduce((s, i) => s + Number(i.preco) * Math.max(1, Math.round(Number(i.quantidade) || 1)), 0);
-
-    if (!nomeRemetente || itens.length === 0 || total <= 0) {
-      res.status(400).json({ error: "nomeRemetente e ao menos um item são obrigatórios" });
+    const result = await runCheckout({
+      metodo: body.metodo === "pix" ? "pix" : "cartao",
+      nomeRemetente: String(body.nomeRemetente ?? ""),
+      cpf: body.cpf ? String(body.cpf) : undefined,
+      mensagem: String(body.mensagem ?? ""),
+      itens: Array.isArray(body.itens) ? body.itens : [],
+    });
+    res.status(201).json(result);
+  } catch (err) {
+    if (err instanceof CheckoutError) {
+      res.status(err.code).json({ error: err.message });
       return;
     }
-
-    orderId = randomUUID();
-    await db.insert(orders).values({
-      id: orderId,
-      externalReference: orderId,
-      status: "pending",
-      metodo: "asaas_card",
-      valor: total.toFixed(2),
-      nomeRemetente,
-      mensagem,
-      itens,
-    });
-
-    const customerId = await findOrCreateCustomer(nomeRemetente);
-    const charge = await createCharge(customerId, total, orderId);
-    await db
-      .update(orders)
-      .set({ asaasId: charge.id, asaasCustomerId: customerId })
-      .where(eq(orders.id, orderId));
-
-    res.status(201).json({ orderId, invoiceUrl: charge.invoiceUrl ?? null, status: charge.status });
-  } catch (err) {
-    // 4xx de validação → abandona (terminal); transitório → gateway_down (recuperável)
-    const validation = err instanceof AsaasApiError;
-    if (orderId) {
-      await db
-        .update(orders)
-        .set({ status: validation ? "abandoned" : "gateway_down" })
-        .where(eq(orders.id, orderId))
-        .catch(() => {});
-    }
     console.error("[checkout]", err);
-    res.status(validation ? 400 : 502).json({ error: "não foi possível criar a cobrança" });
+    res.status(500).json({ error: "erro no servidor" });
   }
 }

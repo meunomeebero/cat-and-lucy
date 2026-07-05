@@ -21,25 +21,39 @@ function renderWithCart(cart: Record<string, number>) {
   );
 }
 
-it("mostra os itens do carrinho, o total, e conclui com POST /api/gifts", async () => {
-  const created = { id: "1", nomeRemetente: "Família Souza", mensagem: "", itens: [], total: 140, criadoEm: 1 };
-  const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => created });
-  vi.stubGlobal("fetch", fetchMock);
-
+it("mostra os itens e o total", () => {
   renderWithCart({ zoologico: 2 });
-
   expect(screen.getByText("Ida ao Zoológico")).toBeInTheDocument();
-  // 140,00 aparece em subtotal, total e Pix
-  expect(screen.getAllByText(/140,00/).length).toBeGreaterThan(0); // total 2 x 70
+  expect(screen.getAllByText(/140,00/).length).toBeGreaterThan(0);
+});
 
+it("Gerar Pix sem CPF válido → mostra erro e NÃO chama a API", () => {
+  const fetchMock = vi.fn();
+  vi.stubGlobal("fetch", fetchMock);
+  renderWithCart({ zoologico: 1 });
   fireEvent.change(screen.getByPlaceholderText(/Família/i), { target: { value: "Família Souza" } });
-  fireEvent.click(screen.getByText(/já paguei no pix/i));
+  fireEvent.click(screen.getByText("Gerar Pix"));
+  expect(screen.getByText(/CPF válido/i)).toBeInTheDocument();
+  expect(fetchMock).not.toHaveBeenCalled();
+});
 
-  expect(await screen.findByText(/Presentes enviados/i)).toBeInTheDocument();
+it("Gerar Pix com CPF → POST /api/checkout (metodo pix) e mostra o QR", async () => {
+  const fetchMock = vi.fn().mockResolvedValue({
+    ok: true,
+    json: async () => ({ orderId: "o1", status: "PENDING", pix: { qrCodeImage: "AAAA", copiaECola: "000201...pix" } }),
+  });
+  vi.stubGlobal("fetch", fetchMock);
+  renderWithCart({ zoologico: 1 });
+  fireEvent.change(screen.getByPlaceholderText(/Família/i), { target: { value: "Família Souza" } });
+  fireEvent.change(screen.getByPlaceholderText(/000\.000/i), { target: { value: "12345678909" } });
+  fireEvent.click(screen.getByText("Gerar Pix"));
+
+  expect(await screen.findByText(/Pague com Pix/i)).toBeInTheDocument();
   const body = JSON.parse((fetchMock.mock.calls[0][1] as RequestInit).body as string);
+  expect(fetchMock.mock.calls[0][0]).toBe("/api/checkout");
+  expect(body.metodo).toBe("pix");
+  expect(body.cpf).toBe("12345678909");
   expect(body.itens[0].giftId).toBe("zoologico");
-  expect(body.itens[0].quantidade).toBe(2);
-  expect(body.total).toBe(140);
 });
 
 it("carrinho vazio mostra o estado vazio", () => {
