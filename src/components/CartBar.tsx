@@ -15,9 +15,11 @@ export function CartBar() {
       {totalItens > 0 && (
         <motion.button
           className={styles.bar}
-          initial={{ y: 90, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 90, opacity: 0 }}
+          // o x:"-50%" centraliza (motion escreve o transform inline e engoliria
+          // o translateX do CSS, então a centralização vive aqui)
+          initial={{ y: 90, x: "-50%", opacity: 0 }}
+          animate={{ y: 0, x: "-50%", opacity: 1 }}
+          exit={{ y: 90, x: "-50%", opacity: 0 }}
           transition={{ type: "spring", stiffness: 320, damping: 26 }}
           whileTap={{ scale: 0.97 }}
           onClick={() => {

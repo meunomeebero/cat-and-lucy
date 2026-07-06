@@ -2,7 +2,7 @@
   position: fixed;
   bottom: 1.4rem;
   left: 50%;
-  transform: translateX(-50%);
+  /* o translateX(-50%) é aplicado pelo motion (x:"-50%") — aqui ele seria sobrescrito */
   z-index: 40;
   display: flex;
   align-items: center;
