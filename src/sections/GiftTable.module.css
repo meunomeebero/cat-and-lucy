@@ -82,6 +82,18 @@
   text-align: center;
   line-height: 1.2;
 }
+.destaque {
+  z-index: 4;
+}
+.destaqueLabel {
+  font-family: var(--font-script);
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--rosa-forte);
+  line-height: 1;
+  margin-top: 0.15rem;
+  white-space: nowrap;
+}
 
 .deco1 { position: absolute; top: 10%; left: 5%; z-index: 1; }
 .deco2 { position: absolute; bottom: 14%; right: 7%; z-index: 1; }

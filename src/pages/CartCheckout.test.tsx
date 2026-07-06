@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { render, screen, fireEvent, cleanup, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, afterEach, it, expect, vi } from "vitest";
 import CartCheckout from "./CartCheckout";
@@ -54,6 +54,33 @@ it("Gerar Pix com CPF → POST /api/checkout (metodo pix) e mostra o QR", async 
   expect(body.metodo).toBe("pix");
   expect(body.cpf).toBe("12345678909");
   expect(body.itens[0].giftId).toBe("zoologico");
+});
+
+it("Pagar com cartão → abre a aba no clique, aponta pro checkout e fica aguardando", async () => {
+  const fakeTab = { location: { href: "" }, close: vi.fn() };
+  const openMock = vi.fn().mockReturnValue(fakeTab);
+  vi.stubGlobal("open", openMock);
+  const fetchMock = vi.fn().mockResolvedValue({
+    ok: true,
+    json: async () => ({
+      orderId: "11111111-1111-1111-1111-111111111111",
+      status: "PENDING",
+      invoiceUrl: "https://asaas.test/i/abc",
+    }),
+  });
+  vi.stubGlobal("fetch", fetchMock);
+  renderWithCart({ zoologico: 1 });
+  fireEvent.change(screen.getByPlaceholderText(/Família/i), { target: { value: "Família Souza" } });
+  fireEvent.click(screen.getByText(/pagar com cartão/i));
+
+  // a aba abre já no clique (gesto do usuário), antes da resposta do checkout
+  expect(openMock).toHaveBeenCalledWith("", "_blank");
+  expect(await screen.findByText(/aguardando pagamento/i)).toBeInTheDocument();
+  expect(fetchMock.mock.calls[0][0]).toBe("/api/checkout");
+  const body = JSON.parse((fetchMock.mock.calls[0][1] as RequestInit).body as string);
+  expect(body.metodo).toBe("cartao");
+  // depois de criar a cobrança, a aba é apontada pro checkout hospedado do Asaas
+  await waitFor(() => expect(fakeTab.location.href).toBe("https://asaas.test/i/abc"));
 });
 
 it("carrinho vazio mostra o estado vazio", () => {

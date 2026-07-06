@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../lib/cart";
 import { FloatingAsset } from "../components/FloatingAsset";
 import { PixSkeleton } from "../components/PixSkeleton";
@@ -13,6 +13,7 @@ type PixData = { qrCodeImage: string; copiaECola: string };
 
 export default function CartCheckout() {
   const { linhas, add, remove, total, totalItens, limpar } = useCart();
+  const navigate = useNavigate();
 
   const [nome, setNome] = useState("");
   const [cpf, setCpf] = useState("");
@@ -24,6 +25,61 @@ export default function CartCheckout() {
   const [erro, setErro] = useState<string | null>(null);
   const [pixData, setPixData] = useState<PixData | null>(null);
   const [copiado, setCopiado] = useState(false);
+  // pedido criado no Asaas: enquanto existe, a tela fica "aguardando pagamento"
+  // e faz polling até confirmar (aí voa pra mesa com confete).
+  const [orderId, setOrderId] = useState<string | null>(null);
+  const [invoiceUrl, setInvoiceUrl] = useState<string | null>(null);
+  const aguardando = orderId !== null;
+
+  useEffect(() => {
+    if (!orderId) return;
+    let alive = true;
+    let tries = 0;
+    let confirmadoSemPresente = 0; // confirmou mas o gift_id ainda não linkou (webhook em 3 passos)
+    const parar = (fn: () => void) => {
+      alive = false;
+      clearInterval(id);
+      fn();
+    };
+    const id = setInterval(async () => {
+      if (!alive) return;
+      if (++tries > 300) return void clearInterval(id); // ~20min de espera, então desiste
+      try {
+        const res = await fetch(`/api/order-status?id=${orderId}`);
+        if (!res.ok) return;
+        const data = (await res.json()) as { status: string; giftId: string | null };
+        if (data.status === "confirmed") {
+          // só voa pra mesa quando o presente já existe (senão o destaque não acha nada);
+          // se demorar demais pra linkar, comemora genérico depois de ~12s.
+          if (data.giftId) {
+            parar(() => {
+              setInvoiceUrl(null);
+              limpar();
+              navigate(`/?presente=${data.giftId}#mesa`);
+            });
+          } else if (++confirmadoSemPresente >= 3) {
+            parar(() => {
+              setInvoiceUrl(null);
+              limpar();
+              navigate(`/?presente=novo#mesa`);
+            });
+          }
+        } else if (["refunded", "abandoned", "gateway_down"].includes(data.status)) {
+          parar(() => {
+            setOrderId(null);
+            setInvoiceUrl(null);
+            setErro("O pagamento não foi concluído. Dá pra tentar de novo 💛");
+          });
+        }
+      } catch {
+        /* rede instável: mantém tentando */
+      }
+    }, 4000);
+    return () => {
+      alive = false;
+      clearInterval(id);
+    };
+  }, [orderId, limpar, navigate]);
 
   const cpfNumeros = cpf.replace(/\D/g, "");
   const cpfOk = cpfNumeros.length === 11 && !/^(\d)\1{10}$/.test(cpfNumeros);
@@ -38,6 +94,7 @@ export default function CartCheckout() {
 
   const gerarPix = async () => {
     setErro(null);
+    setInvoiceUrl(null); // Pix não tem checkout hospedado — não mostrar "reabrir"
     if (!nome.trim()) return setErroNome(true);
     if (!cpfOk) return setErroCpf(true);
     playPop();
@@ -51,6 +108,7 @@ export default function CartCheckout() {
       const data = await res.json();
       if (!res.ok || !data.pix?.copiaECola) throw new Error();
       setPixData(data.pix);
+      setOrderId(data.orderId); // começa a aguardar a confirmação do Pix
     } catch {
       setErro("Não consegui gerar o Pix agora. Confere o CPF e tenta de novo? 💛");
     } finally {
@@ -63,6 +121,10 @@ export default function CartCheckout() {
     if (!nome.trim()) return setErroNome(true);
     playPop();
     setCartaoLoading(true);
+    // abre a aba JÁ no clique (gesto do usuário) pra não cair no bloqueador de popup.
+    // SEM "noopener" aqui: com noopener o window.open devolve null e a gente perde a
+    // referência — depois só apontamos essa aba pro checkout do Asaas quando a cobrança sai.
+    const aba = window.open("", "_blank");
     try {
       const res = await fetch("/api/checkout", {
         method: "POST",
@@ -71,10 +133,20 @@ export default function CartCheckout() {
       });
       const data = await res.json();
       if (!res.ok || !data.invoiceUrl) throw new Error();
-      limpar();
-      window.location.href = data.invoiceUrl;
+      // checkout do cartão abre em OUTRA aba; esta tela fica "aguardando pagamento"
+      setInvoiceUrl(data.invoiceUrl);
+      setOrderId(data.orderId);
+      if (aba) {
+        aba.opener = null; // corta o vínculo com a nossa página depois de já ter a referência
+        aba.location.href = data.invoiceUrl;
+      } else {
+        window.open(data.invoiceUrl, "_blank", "noopener,noreferrer");
+      }
     } catch {
+      if (aba) aba.close();
+      setInvoiceUrl(null);
       setErro("Não consegui abrir o pagamento no cartão. Tenta de novo? 💛");
+    } finally {
       setCartaoLoading(false);
     }
   };
@@ -105,6 +177,22 @@ export default function CartCheckout() {
 
   return (
     <main className={styles.page}>
+      {aguardando && (
+        <div className={styles.aguardando} role="status" aria-live="polite">
+          <span className={styles.aguardandoDot} />
+          <span>aguardando pagamento</span>
+          {invoiceUrl && (
+            <button
+              type="button"
+              className={styles.aguardandoLink}
+              onClick={() => window.open(invoiceUrl, "_blank", "noopener,noreferrer")}
+            >
+              reabrir
+            </button>
+          )}
+        </div>
+      )}
+
       <FloatingAsset src="/assets/estrela-1.png" width={36} className={styles.deco1} duration={3} />
       <FloatingAsset src="/assets/nuvem-2.png" width={100} className={styles.deco2} duration={5.5} delay={0.4} />
 
@@ -195,7 +283,7 @@ export default function CartCheckout() {
               <button
                 className={styles.pixGerarBox}
                 onClick={gerarPix}
-                disabled={pixLoading || cartaoLoading}
+                disabled={pixLoading || cartaoLoading || aguardando}
                 aria-label="gerar pix"
               >
                 <PixSkeleton />
@@ -206,7 +294,7 @@ export default function CartCheckout() {
           </div>
 
           {!pixData && (
-            <button className={styles.linkBtn} onClick={pagarCartao} disabled={pixLoading || cartaoLoading}>
+            <button className={styles.linkBtn} onClick={pagarCartao} disabled={pixLoading || cartaoLoading || aguardando}>
               {cartaoLoading ? "abrindo cartão..." : "ou pagar com cartão"}
             </button>
           )}

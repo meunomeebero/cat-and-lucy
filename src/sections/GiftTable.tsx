@@ -24,7 +24,7 @@ const ESCALAS = [1, 0.92, 1.07, 0.96, 1.04, 0.9, 1.02, 0.94, 1.06, 0.98];
 const FLOAT_THRESHOLD = 40;
 const MAX_FLOATERS = 24;
 
-export function GiftTable() {
+export function GiftTable({ destaqueId }: { destaqueId?: string }) {
   const [gifts, setGifts] = useState<SentGift[]>([]);
   const [sel, setSel] = useState<SentGift | null>(null);
   const [loading, setLoading] = useState(true);
@@ -70,19 +70,26 @@ export function GiftTable() {
             const sc = ESCALAS[i % ESCALAS.length];
             const asset = GIFT_BOXES[i % GIFT_BOXES.length];
             const floating = total <= FLOAT_THRESHOLD || i % stride === 0;
+            const destaque = destaqueId != null && g.id === destaqueId;
             return (
               <motion.button
                 key={g.id}
-                className={styles.item}
+                className={`${styles.item} ${destaque ? styles.destaque : ""}`}
                 style={{ marginTop: STAGGER[i % STAGGER.length] }}
-                initial={{ rotate: rot, scale: sc }}
+                initial={destaque ? { scale: 0, opacity: 0, rotate: rot } : { rotate: rot, scale: sc }}
                 animate={
-                  floating ? { y: [0, -12, 0], rotate: rot, scale: sc } : { y: 0, rotate: rot, scale: sc }
+                  destaque
+                    ? { scale: sc, opacity: 1, rotate: rot, y: 0 }
+                    : floating
+                      ? { y: [0, -12, 0], rotate: rot, scale: sc }
+                      : { y: 0, rotate: rot, scale: sc }
                 }
                 transition={
-                  floating
-                    ? { duration: 4 + (i % 4) * 0.5, delay: (i % 5) * 0.25, repeat: Infinity, ease: "easeInOut" }
-                    : { duration: 0 }
+                  destaque
+                    ? { type: "spring", stiffness: 240, damping: 14, delay: 0.35 }
+                    : floating
+                      ? { duration: 4 + (i % 4) * 0.5, delay: (i % 5) * 0.25, repeat: Infinity, ease: "easeInOut" }
+                      : { duration: 0 }
                 }
                 whileHover={{ scale: sc + 0.08 }}
                 onClick={() => {
@@ -95,6 +102,7 @@ export function GiftTable() {
                 </span>
                 <img src={asset} alt={`presente de ${g.nomeRemetente}`} className={styles.giftImg} />
                 <span className={styles.itemNome}>{g.nomeRemetente}</span>
+                {destaque && <span className={styles.destaqueLabel}>acabou de chegar 💛</span>}
               </motion.button>
             );
           })}

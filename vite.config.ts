@@ -51,6 +51,26 @@ function apiDevServer(): Plugin {
         }
       });
 
+      // /api/order-status?id=... — polling do "aguardando pagamento" em dev
+      server.middlewares.use("/api/order-status", async (req, res) => {
+        res.setHeader("content-type", "application/json");
+        try {
+          const mod = await server.ssrLoadModule("/api/order-status.ts");
+          const id = new URL(req.url ?? "", "http://localhost").searchParams.get("id") ?? "";
+          const r = await mod.getOrderStatus(id);
+          if (!r) {
+            res.statusCode = 404;
+            res.end(JSON.stringify({ error: "not found" }));
+            return;
+          }
+          res.end(JSON.stringify(r));
+        } catch (err) {
+          console.error("[api-dev order-status]", err);
+          res.statusCode = 500;
+          res.end(JSON.stringify({ error: String(err) }));
+        }
+      });
+
       // /api/checkout (Pix + cartão via Asaas) — reaproveita runCheckout da função
       server.middlewares.use("/api/checkout", async (req, res) => {
         res.setHeader("content-type", "application/json");
