@@ -192,23 +192,24 @@ export default function CartCheckout() {
                 <p className={styles.pixAviso}>Assim que o pagamento for confirmado, o presente aparece na mesa 💛</p>
               </>
             ) : (
-              <div className={styles.pixSkeleton}>
+              <button
+                className={styles.pixGerarBox}
+                onClick={gerarPix}
+                disabled={pixLoading || cartaoLoading}
+                aria-label="gerar pix"
+              >
                 <PixSkeleton />
-              </div>
+                <span className={styles.pixGerarLabel}>{pixLoading ? "gerando..." : "gerar pix"}</span>
+              </button>
             )}
             <p className={styles.recebedor}>{RECEBEDOR}</p>
           </div>
 
-          {/* ações em texto */}
-          <div className={styles.acoesTexto}>
-            <button className={styles.linkBtn} onClick={gerarPix} disabled={pixLoading || cartaoLoading}>
-              {pixLoading ? "gerando pix..." : "gerar pix"}
-            </button>
-            <span className={styles.ou}>ou</span>
+          {!pixData && (
             <button className={styles.linkBtn} onClick={pagarCartao} disabled={pixLoading || cartaoLoading}>
-              {cartaoLoading ? "abrindo cartão..." : "pagar com cartão"}
+              {cartaoLoading ? "abrindo cartão..." : "ou pagar com cartão"}
             </button>
-          </div>
+          )}
           {erro && <span className={styles.aviso}>{erro}</span>}
         </div>
       </div>
