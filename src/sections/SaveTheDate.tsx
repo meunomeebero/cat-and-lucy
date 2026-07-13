@@ -76,7 +76,7 @@ export function SaveTheDate() {
           Catarina <span className={styles.e}>&amp;</span> Lucia
         </h1>
         <p className={styles.sub}>Festa de aniversário</p>
-        <p className={styles.evento}>24 de junho · 13h</p>
+        <p className={styles.evento}>24 de julho · 13h</p>
         <p className={styles.local}>
           R. Palmares, 196 — Parque Industrial
           <br />
